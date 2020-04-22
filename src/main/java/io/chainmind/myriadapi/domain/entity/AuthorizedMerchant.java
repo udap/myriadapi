@@ -1,5 +1,6 @@
 package io.chainmind.myriadapi.domain.entity;
 
+import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -9,6 +10,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
+@Entity
 public class AuthorizedMerchant extends AuditableEntity {
 	private static final long serialVersionUID = 3803902527327495621L;
 	

@@ -1,6 +1,4 @@
 spring:
-  profiles:
-    active: dev
   application:
     name: myriadapi
   servlet:
@@ -21,10 +19,12 @@ spring:
       max-lifetime: 540000
       maximum-pool-size: 5
       pool-name: DatebookHikariCP    
+      
   jpa:
     show-sql: false
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.MySQL5Dialect
         format_sql: true
         use_sql_comments: true
         globally_quoted_identifiers: true
@@ -66,10 +66,21 @@ feign:
         read-timeout: 5000
         request-interceptors:
           - feign.RequestInterceptor
-        error-decoder: io.chainmind.gift.client.MyriadClientErrorDecoder
         logger-level: full
 logging:
   level:
     org.springframework: INFO
     io.chainmind: INFO
 
+server:
+  port: 8181
+  session-timeout: 30000
+  tomcat:
+    max-threads: 1000
+    uri-encoding: UTF-8
+  http2:
+    enabled: true
+  compression:
+    enabled: true
+    
+  

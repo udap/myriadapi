@@ -10,7 +10,7 @@ import io.chainmind.myriadapi.domain.entity.Organization;
 public interface AuthorizedMerchantRepository extends JpaRepository<AuthorizedMerchant, Long>, 
 	JpaSpecificationExecutor<AuthorizedMerchant> {
 
-	@Query("SELECT m FROM AuthorizedMerchant am JOIN am.merchant m WHERE am.org=:authoringOrg and m.license=:code")
+	@Query("SELECT m FROM AuthorizedMerchant am JOIN am.merchant m WHERE am.org=:authoringOrg and m.licenseNo=:code")
 	Organization findByLicense(String code, Organization authoringOrg);
 	
 	@Query("SELECT m FROM AuthorizedMerchant am JOIN am.merchant m WHERE am.org=:authoringOrg and am.upCode=:code")

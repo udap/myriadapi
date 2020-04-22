@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 
 import io.chainmind.myriadapi.CacheConfiguration;
 import io.chainmind.myriadapi.domain.CodeType;
@@ -15,6 +16,7 @@ import io.chainmind.myriadapi.persistence.repository.AccountRepository;
 import io.chainmind.myriadapi.service.AccountService;
 import io.chainmind.myriadapi.utils.CommonUtils;
 
+@Service
 public class AccountServiceImpl implements AccountService {
 
 	@Autowired
