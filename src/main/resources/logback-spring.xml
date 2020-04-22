@@ -10,9 +10,9 @@
 	</appender>
 	<appender name="FILE"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>logs/subscription.log</file>
+		<file>logs/myriadapi.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>subscription.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<fileNamePattern>myriadapi.%d{yyyy-MM-dd}.log</fileNamePattern>
 			<maxHistory>10</maxHistory>
 			<totalSizeCap>1GB</totalSizeCap>
 		</rollingPolicy>
@@ -32,7 +32,7 @@
 				<pattern>
 					<pattern>
 						{
-						"appName": "myriad-subscription"
+						"appName": "myriadapi-server"
 						}
 					</pattern>
 				</pattern>
