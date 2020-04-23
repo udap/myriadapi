@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import io.chainmind.myriadapi.CacheConfiguration;
 import io.chainmind.myriadapi.domain.CodeType;
+import io.chainmind.myriadapi.domain.OrganizationStatus;
 import io.chainmind.myriadapi.domain.RequestOrg;
 import io.chainmind.myriadapi.domain.entity.Organization;
 import io.chainmind.myriadapi.domain.exception.ApiException;
@@ -36,7 +37,7 @@ public class AuthorizedMerchantServiceImpl implements AuthorizedMerchantService 
 		} else {
 			throw new ApiException(HttpStatus.BAD_REQUEST,"unknown code type");
 		}
-		if (merchant == null)
+		if (merchant == null || !merchant.getStatus().equals(OrganizationStatus.ACTIVE))
 			throw new ApiException(HttpStatus.NOT_FOUND, "merchant.notFound");
 		return merchant.getId().toString();
 	}
