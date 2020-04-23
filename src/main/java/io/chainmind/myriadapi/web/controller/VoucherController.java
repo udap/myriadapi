@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.chainmind.myriad.domain.common.VoucherStatus;
 import io.chainmind.myriad.domain.common.VoucherType;
 import io.chainmind.myriad.domain.dto.PaginatedResponse;
+import io.chainmind.myriad.domain.dto.voucher.UsageStatus;
 import io.chainmind.myriad.domain.dto.voucher.VoucherListItem;
 import io.chainmind.myriad.domain.dto.voucher.VoucherResponse;
 import io.chainmind.myriadapi.client.VoucherClient;
@@ -43,7 +43,7 @@ public class VoucherController {
 	public PaginatedResponse<VoucherListItem> getVouchers(
             @PageableDefault(size = 20, sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(name="ownerId", required = true) String ownerId,
-            @RequestParam(name="status", required = true) VoucherStatus status,
+            @RequestParam(name="status", required = false) UsageStatus status,
             @RequestParam(name="merchantCode", required = false) String merchantCode,
             @RequestParam(name="idType", required = false, defaultValue="ID") CodeType idType,
             @RequestParam(name="codeType", required = false, defaultValue="ID") CodeType codeType,
@@ -71,7 +71,8 @@ public class VoucherController {
 		String merchantId = StringUtils.hasText(merchantCode)
 				?merchantService.getId(merchantCode, codeType):null;
 		
-		return voucherClient.list(pageable, account.getId().toString(), null, null, merchantId, type, null);
+		return voucherClient.list(pageable, account.getId().toString(), null, null, 
+				merchantId, type, status, null);
 	}
 	
     @GetMapping("/{id}")

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import io.chainmind.myriad.domain.common.VoucherType;
 import io.chainmind.myriad.domain.dto.PaginatedResponse;
+import io.chainmind.myriad.domain.dto.voucher.UsageStatus;
 import io.chainmind.myriad.domain.dto.voucher.VoucherListItem;
 import io.chainmind.myriad.domain.dto.voucher.VoucherResponse;
 
@@ -23,6 +24,7 @@ public interface VoucherClient {
             @RequestParam(required = false) String publisherId,
             @RequestParam(required = false) String merchantId,
             @RequestParam(required = false, defaultValue="COUPON") VoucherType type,
+            @RequestParam(required = false) UsageStatus status,
             @RequestParam(required = false)String searchTxt);
 	
     @GetMapping("/{id}")
