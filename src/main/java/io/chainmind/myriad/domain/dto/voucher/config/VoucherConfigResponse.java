@@ -2,7 +2,6 @@ package io.chainmind.myriad.domain.dto.voucher.config;
 
 import io.chainmind.myriad.domain.common.VoucherType;
 import io.chainmind.myriad.domain.dto.IdResponse;
-import io.chainmind.myriad.domain.dto.customer.CustomerResponse;
 import lombok.Getter;
 import lombok.Setter;
 
