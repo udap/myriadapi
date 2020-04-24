@@ -6,8 +6,9 @@ import lombok.Getter;
 @Getter
 @Builder
 public class OrgDTO {
-	private String uid;
+	private String id;
 	private String name;
+	private String shortName;
 	private String address;
 	private String phone;
 }

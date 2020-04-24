@@ -97,9 +97,10 @@ public class VoucherController {
     		Organization merchant = organizationService.findById(Long.valueOf(id));
     		merchants.add(OrgDTO.builder()
     			.address(merchant.getFullAddress())
-    			.name(merchant.getName())
+    			.name(merchant.getFullName())
+    			.shortName(merchant.getName())
     			.phone(merchant.getPhone())
-    			.uid(merchant.getUid())
+    			.id(merchant.getId().toString())
     			.build());    		
     	}
     	return VoucherDetailsResponse.builder()
