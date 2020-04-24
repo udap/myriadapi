@@ -41,12 +41,12 @@ public class VoucherConfigResponse extends IdResponse {
 	/// Currency.USD unit,
 	/// then 1000 points equals 10 US Dollars; exchangeRate and currency are
 	/// optional attributes
-	private int exchangeRate; // LOYALTY_CARD
-
-	private CustomerResponse customer; // Membership
-	// total points earned
-	int points; // Membership
-	// balance points
-	int balance; // Membership
+//	private Integer exchangeRate; // LOYALTY_CARD
+//
+//	private CustomerResponse customer; // Membership
+//	// total points earned
+//	private Integer points; // Membership
+//	// balance points
+//	private Integer balance; // Membership
 
 }

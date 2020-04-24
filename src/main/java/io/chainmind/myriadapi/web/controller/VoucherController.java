@@ -56,7 +56,7 @@ public class VoucherController {
             @RequestParam(name="idType", required = false, defaultValue="ID") CodeType idType,
             @RequestParam(name="codeType", required = false, defaultValue="ID") CodeType codeType,
             @RequestParam(name="type", required = false, defaultValue="COUPON") VoucherType type) {
-		
+		LOG.debug("ownerId: " + ownerId + ", idType: " + idType);
 		// query account id based on given ownerId and idType
 		Account account = accountService.findByCode(ownerId, idType);	
 		
