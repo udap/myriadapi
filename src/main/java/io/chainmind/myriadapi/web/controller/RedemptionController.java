@@ -14,7 +14,7 @@ import io.chainmind.myriad.domain.dto.redemption.ConfirmRedemptionRequest;
 import io.chainmind.myriad.domain.dto.redemption.ConfirmRedemptionResponse;
 import io.chainmind.myriad.domain.dto.redemption.CreateRedemptionRequest;
 import io.chainmind.myriad.domain.dto.redemption.CreateRedemptionResponse;
-import io.chainmind.myriadapi.client.RedemptionClient;
+import io.chainmind.myriadapi.client.VoucherClient;
 import io.chainmind.myriadapi.domain.dto.CompleteRedemptionRequest;
 import io.chainmind.myriadapi.domain.dto.RedeemVoucherRequest;
 import io.chainmind.myriadapi.domain.entity.Account;
@@ -27,7 +27,7 @@ import io.chainmind.myriadapi.service.AuthorizedMerchantService;
 public class RedemptionController {
 	
 	@Autowired
-	private RedemptionClient redemptionClient;
+	private VoucherClient redemptionClient;
 	@Autowired
 	private AccountService accountService;
 	@Autowired
@@ -46,7 +46,7 @@ public class RedemptionController {
 			throw new ApiException(HttpStatus.NOT_FOUND, "request user not found");
 		redeemReq.setCustomerId(account.getId().toString());
 		redeemReq.setReqUser(redeemReq.getCustomerId());
-		return redemptionClient.create(redeemReq);
+		return redemptionClient.createRedemption(redeemReq);
 	}
 	
 	@PutMapping
@@ -56,6 +56,6 @@ public class RedemptionController {
 		confirmReq.setOrderId(req.getOrderId());
 		confirmReq.setStatus(req.getStatus());
 		confirmReq.setMerchantId(merchantService.getId(req.getMerchantCode(), req.getCodeType()));
-		return redemptionClient.confirm(confirmReq);
+		return redemptionClient.confirmRedemption(confirmReq);
 	}
 }

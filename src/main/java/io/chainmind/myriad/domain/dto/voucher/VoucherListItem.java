@@ -7,5 +7,6 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @SuperBuilder
 public class VoucherListItem extends VoucherSummary {
+	private int merchantCount;
 	private VoucherConfigResponse config;
 }

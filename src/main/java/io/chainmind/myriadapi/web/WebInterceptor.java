@@ -33,9 +33,10 @@ public class WebInterceptor implements HandlerInterceptor {
 		}
 		//registration
 		String appId = request.getHeader("x-app-id");
-		if (!StringUtils.hasText(appId)){
-			throw new ApiException(HttpStatus.UNAUTHORIZED,"header 中没有 appId");
-		}
+		LOG.debug("appId: " + appId);
+//		if (!StringUtils.hasText(appId)){
+//			throw new ApiException(HttpStatus.UNAUTHORIZED,"header 中没有 appId");
+//		}
 		requestOrg.setAppId(appId);
 		AppRegistration registration = appRegistrationService.findWithOrgByAppId(appId);
 		if (registration == null){

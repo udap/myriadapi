@@ -1,7 +1,11 @@
 package io.chainmind.myriadapi.web.controller;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -20,7 +24,10 @@ import io.chainmind.myriad.domain.dto.voucher.VoucherListItem;
 import io.chainmind.myriad.domain.dto.voucher.VoucherResponse;
 import io.chainmind.myriadapi.client.VoucherClient;
 import io.chainmind.myriadapi.domain.CodeType;
+import io.chainmind.myriadapi.domain.dto.OrgDTO;
+import io.chainmind.myriadapi.domain.dto.VoucherDetailsResponse;
 import io.chainmind.myriadapi.domain.entity.Account;
+import io.chainmind.myriadapi.domain.entity.Organization;
 import io.chainmind.myriadapi.service.AccountService;
 import io.chainmind.myriadapi.service.AuthorizedMerchantService;
 import io.chainmind.myriadapi.service.OrganizationService;
@@ -28,7 +35,8 @@ import io.chainmind.myriadapi.service.OrganizationService;
 @RestController
 @RequestMapping("/vouchers")
 public class VoucherController {
-	
+	private static final Logger LOG = LoggerFactory.getLogger(VoucherController.class);
+
 	@Autowired
 	private VoucherClient voucherClient;
 	
@@ -76,11 +84,41 @@ public class VoucherController {
 	}
 	
     @GetMapping("/{id}")
-	public VoucherResponse getVoucherById(@PathVariable(name = "id") String voucherId) {
-    	VoucherResponse response = voucherClient.findById(voucherId);
+	public VoucherDetailsResponse getVoucherById(@PathVariable(name = "id") String voucherId) {
+    	LOG.debug("getVoucherById: " + voucherId);
+    	VoucherResponse voucher = voucherClient.findById(voucherId);
+    	LOG.debug("response: " + voucher.getId());
     	// replace issuer (id) with issuer name
-    	response.setIssuer(organizationService.findById(Long.valueOf(response.getIssuer())).getName());
-    	return response;
+    	voucher.setIssuer(organizationService.findById(Long.valueOf(voucher.getIssuer())).getName());
+    	
+    	// query merchant data based on merchant id
+    	List<OrgDTO> merchants = new ArrayList<OrgDTO>();
+    	for (String id: voucher.getMerchants()) {
+    		Organization merchant = organizationService.findById(Long.valueOf(id));
+    		merchants.add(OrgDTO.builder()
+    			.address(merchant.getFullAddress())
+    			.name(merchant.getName())
+    			.phone(merchant.getPhone())
+    			.uid(merchant.getUid())
+    			.build());    		
+    	}
+    	return VoucherDetailsResponse.builder()
+    		.authorizationCode(voucher.getAuthorizationCode())
+    		.campaign(voucher.getCampaign())
+    		.category(voucher.getCode())
+    		.config(voucher.getConfig())
+    		.effective(voucher.getEffective())
+    		.expiry(voucher.getExpiry())
+    		.id(voucher.getId())
+    		.issuer(voucher.getIssuer())
+    		.metadata(voucher.getMetadata())
+    		.owner(voucher.getOwner())
+    		.redeemedQuantity(voucher.getRedeemedQuantity())
+    		.rules(voucher.getRules())
+    		.status(voucher.getStatus())
+    		.updatedAt(voucher.getUpdatedAt())
+    		.merchants(merchants)
+    		.build();
     }
 
 }
