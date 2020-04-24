@@ -8,4 +8,6 @@ import io.chainmind.myriadapi.domain.entity.Organization;
 public interface OrganizationRepository
 		extends JpaRepository<Organization, Long>, JpaSpecificationExecutor<Organization> {
 
+	Organization findTopByLicenseNo(String code);
+
 }

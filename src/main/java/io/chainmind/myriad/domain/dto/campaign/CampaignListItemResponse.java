@@ -4,10 +4,10 @@ import java.time.LocalDate;
 
 import io.chainmind.myriad.domain.dto.IdResponse;
 import lombok.Getter;
-import lombok.experimental.SuperBuilder;
+import lombok.Setter;
 
 @Getter
-@SuperBuilder
+@Setter
 public class CampaignListItemResponse extends IdResponse {
 	private String owner;
 	private String name;

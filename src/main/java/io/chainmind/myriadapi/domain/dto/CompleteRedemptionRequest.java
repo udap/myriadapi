@@ -1,6 +1,7 @@
 package io.chainmind.myriadapi.domain.dto;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import io.chainmind.myriad.domain.common.RedemptionStatus;
 import io.chainmind.myriadapi.domain.CodeType;
@@ -14,7 +15,7 @@ public class CompleteRedemptionRequest {
 	private String merchantCode;
 	@NotBlank
 	private String orderId;
-	@NotBlank
+	@NotNull
 	private RedemptionStatus status;
 	
 	private CodeType codeType = CodeType.ID;

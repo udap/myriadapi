@@ -7,10 +7,10 @@ import io.chainmind.myriad.domain.common.RedemptionStatus;
 import io.chainmind.myriad.domain.dto.IdResponse;
 import io.chainmind.myriad.domain.dto.voucher.VoucherSummary;
 import lombok.Getter;
-import lombok.experimental.SuperBuilder;
+import lombok.Setter;
 
 @Getter
-@SuperBuilder
+@Setter
 public class RedemptionResponse extends IdResponse {
 
 	private VoucherSummary voucher;
