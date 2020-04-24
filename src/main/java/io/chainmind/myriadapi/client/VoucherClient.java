@@ -26,7 +26,7 @@ import io.chainmind.myriad.domain.dto.voucher.VoucherResponse;
 @FeignClient(name = "voucher-service",url="${myriad.ribbon.listOfServers}")
 public interface VoucherClient {
 	@GetMapping(value = "/vouchers")
-	PaginatedResponse<VoucherListItem> list(
+	PaginatedResponse<VoucherListItem> queryVouchers(
             @PageableDefault(size = 20, sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) String ownerId,
             @RequestParam(required = false) String campaignId,
@@ -36,8 +36,8 @@ public interface VoucherClient {
             @RequestParam(required = false) UsageStatus status,
             @RequestParam(required = false)String searchTxt);
 	
-    @GetMapping("/{id}")
-    public VoucherResponse findById(@PathVariable(name = "id") String voucherId);
+    @GetMapping("/vouchers/{id}")
+    public VoucherResponse findVoucherById(@PathVariable(name = "id") String voucherId);
     
 	@PostMapping(value="/redemptions")
 	CreateRedemptionResponse createRedemption(@Valid @RequestBody CreateRedemptionRequest req);

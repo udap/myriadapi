@@ -8,11 +8,9 @@ import io.chainmind.myriad.domain.dto.IdResponse;
 import io.chainmind.myriad.domain.dto.campaign.NamedCampaign;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
-@SuperBuilder
 public class VoucherSummary extends IdResponse {
 	private LocalDateTime updatedAt;
 	private NamedCampaign campaign;

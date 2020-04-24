@@ -8,11 +8,9 @@ import io.chainmind.myriad.domain.dto.CreateEntityResponse;
 import io.chainmind.myriad.domain.dto.voucher.VoucherSummary;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
-@SuperBuilder
 public class DistributionResponse extends CreateEntityResponse {
 	
 	private VoucherSummary voucher;

@@ -33,7 +33,7 @@ import io.chainmind.myriadapi.service.AuthorizedMerchantService;
 import io.chainmind.myriadapi.service.OrganizationService;
 
 @RestController
-@RequestMapping("/vouchers")
+@RequestMapping("/api/vouchers")
 public class VoucherController {
 	private static final Logger LOG = LoggerFactory.getLogger(VoucherController.class);
 
@@ -64,9 +64,7 @@ public class VoucherController {
 		if (account == null && !CodeType.ID.equals(idType)) {
 			// try to register an account
 			account = accountService.register(ownerId, idType);	
-		}
-		
-		if (account == null) {
+			// return an empty page
 			PaginatedResponse<VoucherListItem> response = new PaginatedResponse<VoucherListItem>();
 			response.setPage(0);
 			response.setSize(0);
@@ -74,19 +72,23 @@ public class VoucherController {
 			response.setEntries(Collections.emptyList());
 			return response;
 		}
-		
+
+		LOG.debug("account: "+ account.getId());
+				
 		// query merchant id
 		String merchantId = StringUtils.hasText(merchantCode)
 				?merchantService.getId(merchantCode, codeType):null;
 		
-		return voucherClient.list(pageable, account.getId().toString(), null, null, 
+		LOG.debug("merchant id: "+ merchantId);
+		
+		return voucherClient.queryVouchers(pageable, account.getId().toString(), null, null, 
 				merchantId, type, status, null);
 	}
 	
     @GetMapping("/{id}")
 	public VoucherDetailsResponse getVoucherById(@PathVariable(name = "id") String voucherId) {
     	LOG.debug("getVoucherById: " + voucherId);
-    	VoucherResponse voucher = voucherClient.findById(voucherId);
+    	VoucherResponse voucher = voucherClient.findVoucherById(voucherId);
     	LOG.debug("response: " + voucher.getId());
     	// replace issuer (id) with issuer name
     	voucher.setIssuer(organizationService.findById(Long.valueOf(voucher.getIssuer())).getName());
@@ -103,23 +105,24 @@ public class VoucherController {
     			.id(merchant.getId().toString())
     			.build());    		
     	}
-    	return VoucherDetailsResponse.builder()
-    		.authorizationCode(voucher.getAuthorizationCode())
-    		.campaign(voucher.getCampaign())
-    		.category(voucher.getCode())
-    		.config(voucher.getConfig())
-    		.effective(voucher.getEffective())
-    		.expiry(voucher.getExpiry())
-    		.id(voucher.getId())
-    		.issuer(voucher.getIssuer())
-    		.metadata(voucher.getMetadata())
-    		.owner(voucher.getOwner())
-    		.redeemedQuantity(voucher.getRedeemedQuantity())
-    		.rules(voucher.getRules())
-    		.status(voucher.getStatus())
-    		.updatedAt(voucher.getUpdatedAt())
-    		.merchants(merchants)
-    		.build();
+    	
+    	VoucherDetailsResponse response = new VoucherDetailsResponse();
+    	response.setAuthorizationCode(voucher.getAuthorizationCode());
+    	response.setCampaign(voucher.getCampaign());
+    	response.setCategory(voucher.getCode());
+    	response.setConfig(voucher.getConfig());
+    	response.setEffective(voucher.getEffective());
+    	response.setExpiry(voucher.getExpiry());
+    	response.setId(voucher.getId());
+    	response.setIssuer(voucher.getIssuer());
+    	response.setMetadata(voucher.getMetadata());
+    	response.setOwner(voucher.getOwner());
+    	response.setRedeemedQuantity(voucher.getRedeemedQuantity());
+    	response.setRules(voucher.getRules());
+    	response.setStatus(voucher.getStatus());
+    	response.setUpdatedAt(voucher.getUpdatedAt());
+    	response.setMerchants(merchants);
+    	return response;
     }
 
 }

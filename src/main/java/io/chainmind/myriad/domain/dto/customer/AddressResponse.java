@@ -1,10 +1,10 @@
 package io.chainmind.myriad.domain.dto.customer;
 
-import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
-@Builder
+@Setter
 public class AddressResponse {
 	private String street;
 

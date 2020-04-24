@@ -23,7 +23,7 @@ import io.chainmind.myriadapi.service.AccountService;
 import io.chainmind.myriadapi.service.AuthorizedMerchantService;
 
 @RestController
-@RequestMapping("/redemptions")
+@RequestMapping("/api/redemptions")
 public class RedemptionController {
 	
 	@Autowired

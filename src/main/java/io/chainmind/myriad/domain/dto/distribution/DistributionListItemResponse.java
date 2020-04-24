@@ -7,11 +7,9 @@ import io.chainmind.myriad.domain.dto.campaign.SimpleCampaignResponse;
 import io.chainmind.myriad.domain.dto.voucher.SimpleVoucherResponse;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
-@SuperBuilder
 public class DistributionListItemResponse extends CreateEntityResponse {
 	private SimpleVoucherResponse voucher;
 	private SimpleCampaignResponse campaign;

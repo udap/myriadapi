@@ -5,11 +5,9 @@ import io.chainmind.myriad.domain.dto.IdResponse;
 import io.chainmind.myriad.domain.dto.customer.CustomerResponse;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
-@SuperBuilder
 public class VoucherConfigResponse extends IdResponse {
 	// voucher type
 	private VoucherType type;
