@@ -52,6 +52,8 @@ spring:
     database: 0
 
 myriad:
+  http:
+    auth-token-header-name: x-app-id
   oidc:
     token-url: https://[host]/auth/realms/myriad/protocol/openid-connect/token
     client-id: myriadapi-server

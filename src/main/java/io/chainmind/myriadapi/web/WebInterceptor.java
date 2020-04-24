@@ -37,15 +37,15 @@ public class WebInterceptor implements HandlerInterceptor {
 //		if (!StringUtils.hasText(appId)){
 //			throw new ApiException(HttpStatus.UNAUTHORIZED,"header 中没有 appId");
 //		}
-		requestOrg.setAppId(appId);
-		AppRegistration registration = appRegistrationService.findWithOrgByAppId(appId);
-		if (registration == null){
-			throw new ApiException(HttpStatus.UNAUTHORIZED,"此appId="+appId+" 没有注册");
-		}
-		// set the organization
-		requestOrg.setAppOrg(registration.getOrg());
-
-		LOG.debug("current org id: " + requestOrg.getAppOrg().getId());
+//		requestOrg.setAppId(appId);
+//		AppRegistration registration = appRegistrationService.findWithOrgByAppId(appId);
+//		if (registration == null){
+//			throw new ApiException(HttpStatus.UNAUTHORIZED,"此appId="+appId+" 没有注册");
+//		}
+//		// set the organization
+//		requestOrg.setAppOrg(registration.getOrg());
+//
+//		LOG.debug("current org id: " + requestOrg.getAppOrg().getId());
 
 		return true;
 	}
