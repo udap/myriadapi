@@ -8,11 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class BatchTransfer {
-	@NotBlank
-	private String campaignId;
-	@NotBlank
-	private String reqUser;
+public class TransferDestination {
 	@NotBlank
 	private String fromOwner;
 	@NotBlank

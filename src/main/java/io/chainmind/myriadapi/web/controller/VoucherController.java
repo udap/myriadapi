@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.chainmind.myriad.domain.common.VoucherType;
 import io.chainmind.myriad.domain.dto.PaginatedResponse;
-import io.chainmind.myriad.domain.dto.voucher.BatchTransfer;
 import io.chainmind.myriad.domain.dto.voucher.BatchTransferRequest;
 import io.chainmind.myriad.domain.dto.voucher.BatchTransferResponse;
 import io.chainmind.myriad.domain.dto.voucher.TransferVoucherRequest;
@@ -39,6 +39,7 @@ import io.chainmind.myriadapi.domain.dto.OrgDTO;
 import io.chainmind.myriadapi.domain.dto.VoucherDetailsResponse;
 import io.chainmind.myriadapi.domain.entity.Account;
 import io.chainmind.myriadapi.domain.entity.Organization;
+import io.chainmind.myriadapi.domain.exception.ApiException;
 import io.chainmind.myriadapi.service.AccountService;
 import io.chainmind.myriadapi.service.AuthorizedMerchantService;
 import io.chainmind.myriadapi.service.OrganizationService;
@@ -146,10 +147,10 @@ public class VoucherController {
     }
     
     @PostMapping("/batchTransfer")
-    public BatchTransferResponse batchTransfer(@RequestBody @Valid List<BatchTransfer> transfers) {
-    	BatchTransferRequest req = new BatchTransferRequest();
-    	req.setItems(transfers);
-    	req.setReqOrgId(requestOrg.getAppOrg().getId().toString());
+    public BatchTransferResponse batchTransfer(@RequestBody @Valid BatchTransferRequest req) {
+    	// TODO: validate the reqOrg is the requestOrg or is a subsidiary of the requestOrg
+    	if (!requestOrg.getAppOrg().getId().toString().equals(req.getReqOrgId()))
+    		throw new ApiException(HttpStatus.BAD_REQUEST, "transfer.invalidOperation");
     	return voucherClient.batchTransfer(req);
     }
 

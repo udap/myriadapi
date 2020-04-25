@@ -12,8 +12,12 @@ import lombok.Setter;
 @Setter
 public class BatchTransferRequest {
 	@NotBlank
+	private String campaignId;
+	@NotBlank
 	private String reqOrgId;
+	@NotBlank
+	private String reqUser;
 	@NotEmpty
-	private List<BatchTransfer> items;
+	private List<TransferDestination> items;
 
 }
