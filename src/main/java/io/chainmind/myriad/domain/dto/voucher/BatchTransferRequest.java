@@ -1,23 +1,19 @@
 package io.chainmind.myriad.domain.dto.voucher;
 
-import lombok.Getter;
-import lombok.Setter;
+import java.util.List;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Positive;
+import javax.validation.constraints.NotEmpty;
+
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter
 public class BatchTransferRequest {
+	@NotBlank
+	private String reqOrgId;
+	@NotEmpty
+	private List<BatchTransfer> items;
 
-	@NotBlank
-	private String campaignId;
-	@NotBlank
-	private String reqUser;
-	@NotBlank
-	private String fromOwner;
-	@NotBlank
-	private String toOwner;
-	@Positive
-	private int amount;
 }

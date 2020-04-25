@@ -15,6 +15,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +24,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.chainmind.myriad.domain.common.VoucherType;
 import io.chainmind.myriad.domain.dto.PaginatedResponse;
+import io.chainmind.myriad.domain.dto.voucher.BatchTransfer;
+import io.chainmind.myriad.domain.dto.voucher.BatchTransferRequest;
+import io.chainmind.myriad.domain.dto.voucher.BatchTransferResponse;
 import io.chainmind.myriad.domain.dto.voucher.TransferVoucherRequest;
 import io.chainmind.myriad.domain.dto.voucher.TransferVoucherResponse;
 import io.chainmind.myriad.domain.dto.voucher.UsageStatus;
@@ -30,6 +34,7 @@ import io.chainmind.myriad.domain.dto.voucher.VoucherListItem;
 import io.chainmind.myriad.domain.dto.voucher.VoucherResponse;
 import io.chainmind.myriadapi.client.VoucherClient;
 import io.chainmind.myriadapi.domain.CodeType;
+import io.chainmind.myriadapi.domain.RequestOrg;
 import io.chainmind.myriadapi.domain.dto.OrgDTO;
 import io.chainmind.myriadapi.domain.dto.VoucherDetailsResponse;
 import io.chainmind.myriadapi.domain.entity.Account;
@@ -45,6 +50,9 @@ public class VoucherController {
 
 	@Autowired
 	private VoucherClient voucherClient;
+
+	@Autowired
+	private RequestOrg requestOrg;
 	
 	@Autowired
 	private AccountService accountService;
@@ -136,5 +144,14 @@ public class VoucherController {
     		@Valid @RequestBody TransferVoucherRequest req) {
     	return voucherClient.transferVoucher(voucherId, req);
     }
+    
+    @PostMapping("/batchTransfer")
+    public BatchTransferResponse batchTransfer(@RequestBody @Valid List<BatchTransfer> transfers) {
+    	BatchTransferRequest req = new BatchTransferRequest();
+    	req.setItems(transfers);
+    	req.setReqOrgId(requestOrg.getAppOrg().getId().toString());
+    	return voucherClient.batchTransfer(req);
+    }
+
 
 }
