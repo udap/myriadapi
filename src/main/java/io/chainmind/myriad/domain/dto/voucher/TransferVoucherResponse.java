@@ -1,11 +1,9 @@
 package io.chainmind.myriad.domain.dto.voucher;
 
 import io.chainmind.myriad.domain.common.VoucherStatus;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 
-@Getter
-@Builder
+@Data
 public class TransferVoucherResponse {
 	// voucher id
 	private String id;

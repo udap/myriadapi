@@ -15,10 +15,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import io.chainmind.myriad.domain.common.VoucherType;
 import io.chainmind.myriad.domain.dto.PaginatedResponse;
+import io.chainmind.myriad.domain.dto.distribution.DistributeVoucherRequest;
+import io.chainmind.myriad.domain.dto.distribution.DistributeVoucherResponse;
 import io.chainmind.myriad.domain.dto.redemption.ConfirmRedemptionRequest;
 import io.chainmind.myriad.domain.dto.redemption.ConfirmRedemptionResponse;
 import io.chainmind.myriad.domain.dto.redemption.CreateRedemptionRequest;
 import io.chainmind.myriad.domain.dto.redemption.CreateRedemptionResponse;
+import io.chainmind.myriad.domain.dto.voucher.TransferVoucherRequest;
+import io.chainmind.myriad.domain.dto.voucher.TransferVoucherResponse;
 import io.chainmind.myriad.domain.dto.voucher.UsageStatus;
 import io.chainmind.myriad.domain.dto.voucher.VoucherListItem;
 import io.chainmind.myriad.domain.dto.voucher.VoucherResponse;
@@ -37,13 +41,20 @@ public interface VoucherClient {
             @RequestParam(required = false)String searchTxt);
 	
     @GetMapping("/vouchers/{id}")
-    public VoucherResponse findVoucherById(@PathVariable(name = "id") String voucherId);
+    VoucherResponse findVoucherById(@PathVariable(name = "id") String voucherId);
     
-	@PostMapping(value="/redemptions")
+    @PutMapping("/vouchers/{id}/transfer")
+    TransferVoucherResponse transferVoucher(@PathVariable(name="id")String voucherId, 
+    		@Valid @RequestBody TransferVoucherRequest req);
+
+	@PostMapping("/distributions")
+	DistributeVoucherResponse distributeVoucher(@Valid @RequestBody DistributeVoucherRequest req);
+    
+    @PostMapping(value="/redemptions")
 	CreateRedemptionResponse createRedemption(@Valid @RequestBody CreateRedemptionRequest req);
 
 	@PutMapping(value="/redemptions")
-	public ConfirmRedemptionResponse confirmRedemption(@Valid @RequestBody ConfirmRedemptionRequest req);
+	ConfirmRedemptionResponse confirmRedemption(@Valid @RequestBody ConfirmRedemptionRequest req);
 
-    
+
 }

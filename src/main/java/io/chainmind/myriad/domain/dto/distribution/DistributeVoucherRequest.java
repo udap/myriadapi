@@ -10,7 +10,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CreateDistributionRequest {
+public class DistributeVoucherRequest {
 	// voucher to be distributed
 	@NotBlank
 	private String voucherId;

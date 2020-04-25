@@ -2,11 +2,9 @@ package io.chainmind.myriad.domain.dto.voucher;
 
 import javax.validation.constraints.NotBlank;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class TransferVoucherRequest {
 	@NotBlank
 	private String voucherId;
