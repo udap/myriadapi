@@ -1,5 +1,6 @@
 package io.chainmind.myriad.domain.dto.voucher;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.constraints.NotBlank;
@@ -18,6 +19,6 @@ public class BatchTransferRequest {
 	@NotBlank
 	private String reqUser;
 	@NotEmpty
-	private List<TransferDestination> items;
+	private List<TransferDestination> entries = new ArrayList<TransferDestination>();
 
 }
