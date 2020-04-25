@@ -5,9 +5,11 @@ import javax.validation.constraints.NotNull;
 
 import io.chainmind.myriad.domain.common.RedemptionStatus;
 import io.chainmind.myriadapi.domain.CodeType;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class CompleteRedemptionRequest {
 	@NotBlank
 	private String voucherId;

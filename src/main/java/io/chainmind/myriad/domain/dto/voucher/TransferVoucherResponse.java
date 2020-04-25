@@ -1,6 +1,6 @@
 package io.chainmind.myriad.domain.dto.voucher;
 
-import io.chainmind.myriad.domain.common.VoucherStatus;
+import io.chainmind.myriad.domain.common.TransferStatus;
 import lombok.Data;
 
 @Data
@@ -10,6 +10,6 @@ public class TransferVoucherResponse {
 	// the new owner of the voucher
 	private String owner;
 	// the status of the voucher
-	private VoucherStatus status;
+	private TransferStatus status;
 
 }

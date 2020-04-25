@@ -24,7 +24,7 @@ public class DistributeVoucherRequest {
 	@NotBlank
 	private String customerId;
 	
-	private Channel channel;
+	private Channel channel = Channel.API;
 	// extra data
 	private Map<String, Object> metadata;
 }

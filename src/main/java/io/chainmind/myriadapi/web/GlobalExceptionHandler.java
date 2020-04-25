@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MultipartException;
 
+import feign.FeignException;
 import io.chainmind.myriadapi.domain.exception.ApiException;
 
 @ControllerAdvice
@@ -35,7 +36,12 @@ public class GlobalExceptionHandler {
 		return stringResponseEntity;
 	}
 
-
+	@ExceptionHandler(FeignException.class)
+	@ResponseBody	
+	public ResponseEntity<String> feignExceptionHandler(FeignException feignEx) throws Exception {
+		return new ResponseEntity<String>(feignEx.getMessage(), HttpStatus.valueOf(feignEx.status()));
+	}
+	
 	@ExceptionHandler(ApiException.class)
 	@ResponseBody
 	public ResponseEntity<Object> apiErrorHandler(ApiException apiException) throws Exception {
