@@ -76,9 +76,10 @@ public class VoucherController {
 		Account account = accountService.findByCode(ownerId, idType);	
 		
 		// try to register an account
-		if (account == null && !CodeType.ID.equals(idType)) {
+		if (account == null) {
 			// try to register an account
-			account = accountService.register(ownerId, idType);	
+			if(!CodeType.ID.equals(idType))
+				account = accountService.register(ownerId, idType);	
 			// return an empty page
 			PaginatedResponse<VoucherListItem> response = new PaginatedResponse<VoucherListItem>();
 			response.setPage(0);
@@ -87,7 +88,7 @@ public class VoucherController {
 			response.setEntries(Collections.emptyList());
 			return response;
 		}
-
+		
 		LOG.debug("account: "+ account.getId());
 				
 		// query merchant id
