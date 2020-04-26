@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import io.chainmind.myriad.domain.common.VoucherType;
 import io.chainmind.myriad.domain.dto.PaginatedResponse;
+import io.chainmind.myriad.domain.dto.distribution.BatchDistributionRequest;
+import io.chainmind.myriad.domain.dto.distribution.BatchDistributionResponse;
 import io.chainmind.myriad.domain.dto.distribution.DistributeVoucherRequest;
 import io.chainmind.myriad.domain.dto.distribution.DistributeVoucherResponse;
 import io.chainmind.myriad.domain.dto.redemption.ConfirmRedemptionRequest;
@@ -55,6 +57,9 @@ public interface VoucherClient {
 
 	@PostMapping("/distributions")
 	DistributeVoucherResponse distributeVoucher(@Valid @RequestBody DistributeVoucherRequest req);
+	
+	@PostMapping("/distributions/batch")
+	BatchDistributionResponse distributeVouchers(@Valid @RequestBody BatchDistributionRequest req);
     
     @PostMapping(value="/redemptions")
 	CreateRedemptionResponse createRedemption(@Valid @RequestBody CreateRedemptionRequest req);
