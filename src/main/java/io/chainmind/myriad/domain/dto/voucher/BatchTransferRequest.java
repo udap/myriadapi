@@ -14,8 +14,10 @@ import lombok.Setter;
 public class BatchTransferRequest {
 	@NotBlank
 	private String campaignId;
+	// the organization that transfers vouchers
 	@NotBlank
 	private String reqOrgId;
+	// the account that owns the vouchers
 	@NotBlank
 	private String reqUser;
 	@NotEmpty
