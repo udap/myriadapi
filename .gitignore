@@ -4,6 +4,9 @@ target/
 !**/src/main/**
 !**/src/test/**
 
+### SENSITIVE CONFIG FILES ###
+*.yml
+
 ### STS ###
 .apt_generated
 .classpath

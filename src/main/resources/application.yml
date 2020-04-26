@@ -8,9 +8,9 @@ spring:
       max-request-size: 10MB
   datasource: # DATASOURCE
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://[host]/gift_dev?serverTimezone=GMT%2B8&useServerPrepStmts=true
+    url: jdbc:mysql://47.104.225.39/gift_dev?serverTimezone=GMT%2B8&useServerPrepStmts=true
     username: root
-    password: [changeme]
+    password: ydZuAqfy$**133
     hikari:
       auto-commit: true
       connection-test-query: SELECT 1
@@ -21,7 +21,7 @@ spring:
       pool-name: DatebookHikariCP    
       
   jpa:
-    show-sql: false
+    show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL5Dialect
@@ -55,11 +55,11 @@ myriad:
   http:
     auth-token-header-name: x-app-id
   oidc:
-    token-url: https://[host]/auth/realms/myriad/protocol/openid-connect/token
+    token-url: https://keycloak-test.xinongtech.com/auth/realms/myriad/protocol/openid-connect/token
     client-id: myriadapi-server
-    client-secret: [changeme]
+    client-secret: d7d73922-1943-4f29-b97f-0287a7b7fa4c
   ribbon:
-    listOfServers: https://[host]/api/v1/    
+    listOfServers: https://myriad-test.xinongtech.com/api/v1/    
 
 feign:
   client:
