@@ -42,6 +42,7 @@ public interface VoucherClient {
             @RequestParam(required = false) String merchantId,
             @RequestParam(required = false, defaultValue="COUPON") VoucherType type,
             @RequestParam(required = false) UsageStatus status,
+            @RequestParam(required = false, defaultValue="false") Boolean includeIssued,
             @RequestParam(required = false)String searchTxt);
 	
     @GetMapping("/vouchers/{id}")

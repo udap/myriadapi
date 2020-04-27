@@ -96,9 +96,9 @@ public class VoucherController {
 				?merchantService.getId(merchantCode, codeType):null;
 		
 		LOG.debug("merchant id: "+ merchantId);
-		
+		// excludes NEW vouchers
 		return voucherClient.queryVouchers(pageable, account.getId().toString(), null, null, 
-				merchantId, type, status, null);
+				merchantId, type, status, true, null);
 	}
 	
     @GetMapping("/{id}")
