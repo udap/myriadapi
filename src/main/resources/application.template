@@ -8,9 +8,9 @@ spring:
       max-request-size: 10MB
   datasource: # DATASOURCE
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://47.104.225.39/gift_dev?serverTimezone=GMT%2B8&useServerPrepStmts=true
-    username: root
-    password: ydZuAqfy$**133
+    url: jdbc:mysql://[db-server]/gift_dev?serverTimezone=GMT%2B8&useServerPrepStmts=true
+    username: [username]
+    password: [password]
     hikari:
       auto-commit: true
       connection-test-query: SELECT 1
@@ -48,18 +48,18 @@ spring:
   redis:
     host: localhost
     port: 6379
-    password:
+    password: [pwd]
     database: 0
 
 myriad:
   http:
     auth-token-header-name: x-app-id
   oidc:
-    token-url: https://keycloak-test.xinongtech.com/auth/realms/myriad/protocol/openid-connect/token
-    client-id: myriadapi-server
-    client-secret: d7d73922-1943-4f29-b97f-0287a7b7fa4c
+    token-url: [token-url]
+    client-id: [client-id]
+    client-secret: [client-secret]
   ribbon:
-    listOfServers: https://myriad-test.xinongtech.com/api/v1/    
+    listOfServers: [ribon-servers]   
 
 feign:
   client:
