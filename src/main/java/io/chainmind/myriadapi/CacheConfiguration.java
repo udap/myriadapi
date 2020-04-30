@@ -19,7 +19,8 @@ public class CacheConfiguration {
 	public static final String GROUP_CACHE = "groups";
 	public static final String ORGANIZATION_CACHE = "organizations";
 	public static final String ORGANIZATION_BY_ID_CACHE = "organizations.id";
-		
+	public static final String CUSTOMER_BY_ACCT_ORG_CACHE = "customers.acct-org";
+	public static final String EMPLOYEE_CACHE = "employees.org-account";	
 	
 	@Bean
 	public KeyGenerator multiplyKeyGenerator() {
