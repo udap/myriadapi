@@ -10,9 +10,11 @@ import io.chainmind.myriad.domain.common.Channel;
 import io.chainmind.myriadapi.domain.entity.Employee;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
 @Builder
+@ToString
 public class BatchDistributionEvent {
 	
 	private boolean all;
