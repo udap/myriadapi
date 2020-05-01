@@ -63,4 +63,13 @@ public class AccountServiceImpl implements AccountService {
 		return accountRepo.save(account);
 	}
 
+	@Cacheable(value = CacheConfiguration.ACCOUNT_CACHE, unless="#result == null")	
+	@Override
+	public Account findById(String id) {
+		Optional<Account> account = accountRepo.findById(Long.valueOf(id));
+		if (account.isPresent())
+			return account.get();
+		return null;
+	}
+
 }

@@ -3,6 +3,7 @@ package io.chainmind.myriadapi.client;
 import javax.validation.Valid;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -13,8 +14,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import io.chainmind.myriad.domain.common.CampaignStatus;
+import io.chainmind.myriad.domain.common.ParticipantType;
+import io.chainmind.myriad.domain.common.PartyType;
 import io.chainmind.myriad.domain.common.VoucherType;
 import io.chainmind.myriad.domain.dto.PaginatedResponse;
+import io.chainmind.myriad.domain.dto.campaign.CampaignListItemResponse;
 import io.chainmind.myriad.domain.dto.distribution.BatchDistributionRequest;
 import io.chainmind.myriad.domain.dto.distribution.BatchDistributionResponse;
 import io.chainmind.myriad.domain.dto.distribution.DistributeVoucherRequest;
@@ -33,12 +38,24 @@ import io.chainmind.myriad.domain.dto.voucher.VoucherResponse;
 
 @FeignClient(name = "voucher-service",url="${myriad.ribbon.listOfServers}")
 public interface VoucherClient {
+	
+    @GetMapping(value="/campaigns")
+    public Page<CampaignListItemResponse> listCampaigns(
+            @PageableDefault(size = 20, direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(required = false) String partyId, // party id
+            @RequestParam(required = false, defaultValue="HOST")PartyType partyType,            
+            @RequestParam(required = false) String participantId, // the account that participated in the campaign
+            @RequestParam(required = false, defaultValue="OWNER") ParticipantType participantType,
+            @RequestParam(required = false) CampaignStatus status,            
+            @RequestParam(required = false)String searchTxt);
+
+	
 	@GetMapping(value = "/vouchers")
 	PaginatedResponse<VoucherListItem> queryVouchers(
             @PageableDefault(size = 20, sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) String ownerId,
             @RequestParam(required = false) String campaignId,
-            @RequestParam(required = false) String publisherId,
+            @RequestParam(required = false) String issuerId,
             @RequestParam(required = false) String merchantId,
             @RequestParam(required = false, defaultValue="COUPON") VoucherType type,
             @RequestParam(required = false) UsageStatus status,
