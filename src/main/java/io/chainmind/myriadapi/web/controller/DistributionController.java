@@ -9,6 +9,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +22,8 @@ import io.chainmind.myriadapi.client.VoucherClient;
 import io.chainmind.myriadapi.domain.CodeType;
 import io.chainmind.myriadapi.domain.dto.BatchStatus;
 import io.chainmind.myriadapi.domain.dto.DistributeToCustomersRequest;
-import io.chainmind.myriadapi.domain.dto.DistributeToCustomersRequest.StrictMode;
+import io.chainmind.myriadapi.domain.dto.DistributeToSingleCustomerRequest;
+import io.chainmind.myriadapi.domain.dto.DistributionMode;
 import io.chainmind.myriadapi.domain.entity.Account;
 import io.chainmind.myriadapi.domain.entity.Customer;
 import io.chainmind.myriadapi.domain.entity.Employee;
@@ -52,8 +54,39 @@ public class DistributionController {
 	private EventPublisher eventPublisher;
 	
 	@PostMapping
-	public DistributeVoucherResponse distributeVoucher(@Valid @RequestBody DistributeVoucherRequest req) {
-		return voucherClient.distributeVoucher(req);
+	public DistributeVoucherResponse distributeVoucher(@Valid @RequestBody DistributeToSingleCustomerRequest req) {
+		if (!StringUtils.hasText(req.getCampaignId()) && !StringUtils.hasText(req.getVoucherId()))
+			throw new ApiException(HttpStatus.BAD_REQUEST, "distribution.missingParams");
+		
+		// retrieve organization 
+		Organization org = orgService.findById(Long.valueOf(req.getReqOrg()));
+		if (!org.isActive())
+			throw new ApiException(HttpStatus.NOT_FOUND, "organization.notFound");
+		
+		Account mgrAccount = accountService.findByCode(req.getReqUser(), CodeType.ID);
+		if (mgrAccount == null || !mgrAccount.isEnabled())
+			throw new ApiException(HttpStatus.NOT_FOUND, "account.notFound");
+		
+		// query customerManager based on reqUser and reqOrg
+		Employee mgrEmployee = employeeService.findByOrganizationAndAccount(org, mgrAccount);
+		if (mgrEmployee == null || !mgrEmployee.isActive())
+			throw new ApiException(HttpStatus.NOT_FOUND, "employee.notFound");
+
+		Account customerAccount = accountService.findByCode(req.getCustomerId(), req.getCustomerIdType());
+		Customer customer = customerService.findByAccountAndManager(customerAccount, mgrEmployee);
+		if (customer == null) 
+			throw new ApiException(HttpStatus.NOT_FOUND, "customer.notFound");
+
+		DistributeVoucherRequest mReq = new DistributeVoucherRequest();
+		mReq.setChannel(req.getChannel());
+		mReq.setCustomerId(customer.getId().toString());
+		mReq.setMetadata(req.getMetadata());
+		mReq.setReqOrg(req.getReqOrg());
+		mReq.setReqUser(req.getReqUser());
+		mReq.setVoucherId(req.getVoucherId());
+		mReq.setCampaignId(req.getCampaignId());
+		
+		return voucherClient.distributeVoucher(mReq);
 	}
 	
 	@PostMapping("/batch")
@@ -92,14 +125,14 @@ public class DistributionController {
 					for (String code: req.getAccounts()) {
 						Account account = accountService.findByCode(code, req.getAccountCodeType());
 						if (account != null) {
-							if (req.getStrictMode().equals(StrictMode.REQUSER_ONLY)) {
+							if (req.getStrictMode().equals(DistributionMode.REQUSER_ONLY)) {
 								// is the account a customer of the reqUser?
 								Customer customer = customerService.findByAccountAndManager(account, mgrEmployee);
 								if (customer == null) 
 									throw new ApiException(HttpStatus.NOT_FOUND, "customer.notFound");
 									
 								
-							} else if (req.getStrictMode().equals(StrictMode.REQORG_ONLY)) {
+							} else if (req.getStrictMode().equals(DistributionMode.REQORG_ONLY)) {
 								// is the account a customer of the reqOrg?
 								Customer customer = customerService.findByAccountAndOrganization(account, org);
 								if (customer == null)

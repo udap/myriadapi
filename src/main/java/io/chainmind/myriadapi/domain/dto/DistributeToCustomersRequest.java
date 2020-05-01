@@ -14,11 +14,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class DistributeToCustomersRequest {
-	public static enum StrictMode {
-		REQUSER_ONLY,
-		REQORG_ONLY,
-		ANY
-	}
 	@NotBlank
 	private String campaignId;
 	
@@ -34,7 +29,7 @@ public class DistributeToCustomersRequest {
 
 	// distribute to request user's customers only (strict mode) 
 	// or distribute to request org's customer only
-	private StrictMode strictMode = StrictMode.ANY;
+	private DistributionMode strictMode = DistributionMode.ANY;
 	
 	// distribute to all customers? if this property is set to true, the customers list
 	// will be ignored
