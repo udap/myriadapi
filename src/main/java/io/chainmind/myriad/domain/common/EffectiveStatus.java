@@ -3,10 +3,12 @@ package io.chainmind.myriad.domain.common;
 import java.time.LocalDate;
 
 public enum EffectiveStatus {
-	// campaign is activated and in progress
-	ACTIVE,
 	// campaign is activated but not started
 	PENDING,
+	// campaign is activated and in progress
+	ACTIVE,
+	// pending and active
+	NON_EXPIRED,
 	// campaign is activated but expired
 	EXPIRED;
 

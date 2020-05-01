@@ -1,7 +1,5 @@
 package io.chainmind.myriadapi.web.controller;
 
-import java.util.Set;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -48,7 +46,7 @@ public class CampaignController {
             @RequestParam(required = false) String participantId, // the account that participated in the campaign
             @RequestParam(required = false, defaultValue="OWNER") ParticipantType participantType,
             @RequestParam(required = false, defaultValue="ID") CodeType participantIdType,
-            @RequestParam(required = false) Set<EffectiveStatus> statuses,            
+            @RequestParam(required = false) EffectiveStatus status,            
             @RequestParam(required = false)String searchTxt) {
     	
     	if (StringUtils.hasText(participantId)) {
@@ -66,7 +64,7 @@ public class CampaignController {
     		throw new ApiException(HttpStatus.BAD_REQUEST, "campaign.missingParams");
     	
     	Page<CampaignListItemResponse> page = voucherClient.listCampaigns(pageable, partyId, partyType, 
-    			participantId, participantType, statuses, searchTxt);
+    			participantId, participantType, status, searchTxt);
     	
     	for(CampaignListItemResponse c : page.getContent()) {
     		Account account = accountService.findById(c.getCreatedBy());

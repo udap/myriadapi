@@ -1,7 +1,5 @@
 package io.chainmind.myriadapi.client;
 
-import java.util.Set;
-
 import javax.validation.Valid;
 
 import org.springframework.cloud.openfeign.FeignClient;
@@ -48,7 +46,7 @@ public interface VoucherClient {
             @RequestParam(required = false, defaultValue="HOST")PartyType partyType,            
             @RequestParam(required = false) String participantId, // the account that participated in the campaign
             @RequestParam(required = false, defaultValue="OWNER") ParticipantType participantType,
-            @RequestParam(required = false) Set<EffectiveStatus> statuses,            
+            @RequestParam(required = false) EffectiveStatus status,            
             @RequestParam(required = false)String searchTxt);
 
 	
