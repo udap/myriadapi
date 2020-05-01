@@ -1,5 +1,7 @@
 package io.chainmind.myriadapi.client;
 
+import java.util.Set;
+
 import javax.validation.Valid;
 
 import org.springframework.cloud.openfeign.FeignClient;
@@ -14,7 +16,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import io.chainmind.myriad.domain.common.CampaignStatus;
+import io.chainmind.myriad.domain.common.EffectiveStatus;
 import io.chainmind.myriad.domain.common.ParticipantType;
 import io.chainmind.myriad.domain.common.PartyType;
 import io.chainmind.myriad.domain.common.VoucherType;
@@ -46,7 +48,7 @@ public interface VoucherClient {
             @RequestParam(required = false, defaultValue="HOST")PartyType partyType,            
             @RequestParam(required = false) String participantId, // the account that participated in the campaign
             @RequestParam(required = false, defaultValue="OWNER") ParticipantType participantType,
-            @RequestParam(required = false) CampaignStatus status,            
+            @RequestParam(required = false) Set<EffectiveStatus> statuses,            
             @RequestParam(required = false)String searchTxt);
 
 	

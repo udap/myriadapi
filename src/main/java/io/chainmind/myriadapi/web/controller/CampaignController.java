@@ -1,5 +1,7 @@
 package io.chainmind.myriadapi.web.controller;
 
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.chainmind.myriad.domain.common.CampaignStatus;
+import io.chainmind.myriad.domain.common.EffectiveStatus;
 import io.chainmind.myriad.domain.common.ParticipantType;
 import io.chainmind.myriad.domain.common.PartyType;
 import io.chainmind.myriad.domain.dto.campaign.CampaignListItemResponse;
@@ -46,7 +48,7 @@ public class CampaignController {
             @RequestParam(required = false) String participantId, // the account that participated in the campaign
             @RequestParam(required = false, defaultValue="OWNER") ParticipantType participantType,
             @RequestParam(required = false, defaultValue="ID") CodeType participantIdType,
-            @RequestParam(required = false) CampaignStatus status,            
+            @RequestParam(required = false) Set<EffectiveStatus> statuses,            
             @RequestParam(required = false)String searchTxt) {
     	
     	if (StringUtils.hasText(participantId)) {
@@ -64,7 +66,7 @@ public class CampaignController {
     		throw new ApiException(HttpStatus.BAD_REQUEST, "campaign.missingParams");
     	
     	Page<CampaignListItemResponse> page = voucherClient.listCampaigns(pageable, partyId, partyType, 
-    			participantId, participantType, status, searchTxt);
+    			participantId, participantType, statuses, searchTxt);
     	
     	for(CampaignListItemResponse c : page.getContent()) {
     		Account account = accountService.findById(c.getCreatedBy());
