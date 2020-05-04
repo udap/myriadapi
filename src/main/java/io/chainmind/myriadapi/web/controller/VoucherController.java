@@ -3,6 +3,7 @@ package io.chainmind.myriadapi.web.controller;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import javax.validation.Valid;
 
@@ -53,7 +54,7 @@ public class VoucherController {
 	private VoucherClient voucherClient;
 
 	@Autowired
-	private RequestOrg requestOrg;
+	private RequestOrg appOrg;
 	
 	@Autowired
 	private AccountService accountService;
@@ -149,9 +150,14 @@ public class VoucherController {
     
     @PostMapping("/batchTransfer")
     public BatchTransferResponse batchTransfer(@RequestBody @Valid BatchTransferRequest req) {
-    	// TODO: validate the reqOrg is the requestOrg or is a subsidiary of the requestOrg
-    	if (!requestOrg.getAppOrg().getId().toString().equals(req.getReqOrgId()))
-    		throw new ApiException(HttpStatus.BAD_REQUEST, "transfer.invalidOperation");
+    	// validate the appOrg is an ancestor of the reqOrg
+    	Organization reqOrg = organizationService.findById(Long.valueOf(req.getReqOrgId()));
+    	if (reqOrg==null)
+    		throw new ApiException(HttpStatus.NOT_FOUND, "batchTransfer.invalidParams");
+    	Organization topAncestor = organizationService.findTopAncestor(reqOrg);
+    	if (!Objects.equals(topAncestor, appOrg.getAppOrg()))
+    		throw new ApiException(HttpStatus.FORBIDDEN, "batchTransfer.invalidParams");
+
     	return voucherClient.batchTransfer(req);
     }
 

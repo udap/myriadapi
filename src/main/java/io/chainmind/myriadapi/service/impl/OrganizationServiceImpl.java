@@ -27,4 +27,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 		return null;
 	}
 
+
+	@Cacheable(value = CacheConfiguration.ORGANIZATION_ANCESTOR_CACHE, 
+			key="#org.id", unless="#result == null")
+	@Override
+	public Organization findTopAncestor(Organization org) {
+		return orgRepo.findTopAncestor(org);
+	}
+
 }
