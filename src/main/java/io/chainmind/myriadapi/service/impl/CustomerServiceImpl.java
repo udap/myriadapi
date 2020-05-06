@@ -1,8 +1,11 @@
 package io.chainmind.myriadapi.service.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +26,10 @@ public class CustomerServiceImpl implements CustomerService {
 	@Cacheable(value = CacheConfiguration.CUSTOMER_BY_ACCT_ORG_CACHE, unless="#result == null")
 	@Override
 	public Customer findByAccountAndOrganization(Account account, Organization org) {
-		return customerRepo.findTopByAccountAndOrganization(account, org);
+		List<Customer> customers = customerRepo.findByAccountAndOrganization(account, org, PageRequest.of(0, 1));
+		if (customers.isEmpty())
+			return null;
+		return customers.get(0);
 	}
 
 	@Override

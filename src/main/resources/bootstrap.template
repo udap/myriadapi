@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: myriadapi-service
+  cloud:
+    consul:
+      host: [consul-agent-ip-address]
+      port: 8500
+      discovery:
+        acl-token: [consul-acl-token]
+        instance-id: "${spring.cloud.client.hostname}:${spring.application.name}:${random.int[1,999999]}"
+
+logging:
+  level:
+    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+
+server:
+  port: ${PORT:8181}

@@ -58,8 +58,6 @@ myriad:
     token-url: [token-url]
     client-id: [client-id]
     client-secret: [client-secret]
-  ribbon:
-    listOfServers: [ribon-servers]   
 
 feign:
   client:

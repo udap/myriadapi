@@ -36,7 +36,7 @@ import io.chainmind.myriad.domain.dto.voucher.UsageStatus;
 import io.chainmind.myriad.domain.dto.voucher.VoucherListItem;
 import io.chainmind.myriad.domain.dto.voucher.VoucherResponse;
 
-@FeignClient(name = "voucher-service",url="${myriad.ribbon.listOfServers}")
+@FeignClient(name = "voucher-service")
 public interface VoucherClient {
 	
     @GetMapping(value="/campaigns")
