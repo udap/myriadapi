@@ -2,6 +2,7 @@ package io.chainmind.myriadapi.persistence.repository;
 
 import static org.junit.Assert.assertTrue;
 
+import io.chainmind.myriadapi.domain.entity.Organization;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,13 +17,13 @@ import lombok.extern.slf4j.Slf4j;
 @SpringBootTest
 public class AuthorizedMerchantRepositoryTest {
 	@Autowired
-	private AuthorizedMerchantRepository amRepo;
+	private OrganizationRepository orgRepo;
 	
     @Test
     public void findTopByUpCode(){
-    	AuthorizedMerchant merchant = amRepo.findTopByUpCode("777290058135881");
+    	Organization merchant = orgRepo.findTopByUpCode("777290058135881");
     	assertTrue(merchant != null);
-    	log.debug("Current merchant is {}", merchant.getMerchant().getStatus());
+    	log.debug("Current merchant is {}", merchant.getStatus());
     }
 
 }

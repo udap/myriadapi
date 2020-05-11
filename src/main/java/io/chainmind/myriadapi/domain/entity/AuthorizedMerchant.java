@@ -21,11 +21,5 @@ public class AuthorizedMerchant extends AuditableEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "merchant_id")	
 	private Organization merchant;
-	
-	// union pay merchant code
-	private String upCode;
-	// wechat pay merchant code
-	private String wpCode;
-	// alipay merchant code
-	private String apCode;
+
 }

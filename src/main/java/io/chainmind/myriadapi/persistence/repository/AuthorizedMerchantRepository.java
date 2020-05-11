@@ -9,13 +9,6 @@ import io.chainmind.myriadapi.domain.entity.AuthorizedMerchant;
 public interface AuthorizedMerchantRepository extends JpaRepository<AuthorizedMerchant, Long>, 
 	JpaSpecificationExecutor<AuthorizedMerchant> {
 	
-	@EntityGraph(attributePaths = { "merchant"})
-	AuthorizedMerchant findTopByUpCode(String code);
 
-	@EntityGraph(attributePaths = { "merchant"})
-	AuthorizedMerchant findTopByWpCode(String code);
-
-	@EntityGraph(attributePaths = { "merchant"})
-	AuthorizedMerchant findTopByApCode(String code);
 
 }

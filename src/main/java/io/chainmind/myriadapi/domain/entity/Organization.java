@@ -36,6 +36,12 @@ public class Organization extends UidEntity {
 	private String phone;
 	private String fax;
 	private String licenseNo;
+	// union pay merchant code
+	private String upCode;
+	// wechat pay merchant code
+	private String wpCode;
+	// alipay merchant code
+	private String apCode;
 	
 	@Enumerated(EnumType.STRING)
 	private OrganizationStatus status = OrganizationStatus.NEW;
