@@ -1,5 +1,7 @@
 package io.chainmind.myriad.domain.dto.campaign;
 
+import javax.validation.constraints.Positive;
+
 import io.chainmind.myriad.domain.common.CampaignType;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,16 +15,9 @@ public class CreateVoucherCampaignRequest extends CreateCampaignRequest {
 		this.setType(CampaignType.VOUCHER);
 	}
 
-	// total supply of vouchers
-
-	/*@ApiModelProperty(value="生成券的最大数量")
 	@Positive
-	private Integer totalSupply;
+	private int totalSupply;
 
-	@ApiModelProperty(value="生成的券达到最大数量，是否可以增加")
-	private Boolean autoUpdate;
-*/
-
-
+	private boolean autoUpdate;
 
 }

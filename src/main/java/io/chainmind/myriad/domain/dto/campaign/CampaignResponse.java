@@ -24,6 +24,10 @@ public class CampaignResponse extends IdResponse {
 	private String category;
 	private LocalDate effective;
 	private LocalDate expiry;
+	// number of vouchers to be issued
+	private int totalSupply;
+	// allow or disallow additional issuance
+	private boolean autoUpdate;
 	private String url;
 	private Set<CampaignPartyResponse> parties;
 	private String status;

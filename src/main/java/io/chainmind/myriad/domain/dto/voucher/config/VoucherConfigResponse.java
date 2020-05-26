@@ -19,10 +19,6 @@ public class VoucherConfigResponse extends IdResponse {
 	private boolean multiple;
 	// code for fixed code voucher config
 	private String code;
-	// number of vouchers to be issued
-	private int totalSupply;
-	// allow or disallow additional issuance
-	private boolean autoUpdate;
 
 	private String coverImg;
 	private CodeConfigResponse codeConfig;

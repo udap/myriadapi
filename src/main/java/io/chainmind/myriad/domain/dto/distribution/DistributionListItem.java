@@ -1,20 +1,19 @@
 package io.chainmind.myriad.domain.dto.distribution;
 
+import java.time.LocalDateTime;
+
 import io.chainmind.myriad.domain.common.DistributionStatus;
-import io.chainmind.myriad.domain.dto.campaign.SimpleCampaignItem;
+import io.chainmind.myriad.domain.dto.campaign.NamedCampaign;
 import io.chainmind.myriad.domain.dto.voucher.SimpleVoucherItem;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
 public class DistributionListItem {
 	private String id;
 	private SimpleVoucherItem voucher;
-	private SimpleCampaignItem campaign;
+	private NamedCampaign campaign;
 	// customer whom the voucher is distributed to
 	private String customerId;
 	// which channel is used to distribute the voucher
