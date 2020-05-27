@@ -15,6 +15,9 @@ public class SimpleVoucherConfig {
 	
 	private Integer redemption;
 	private Boolean authorizationRequired;
+	
+	// effective days after distribution
+	private Integer daysAfterDist;
 
 	private String coverImg;
 
