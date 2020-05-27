@@ -40,11 +40,6 @@ public abstract class VoucherConfigCreationRequest implements Serializable {
 	@Size(max = 8)
 	private String code;
 
-	@Positive
-	private int totalSupply = 1;
-
-	private boolean autoUpdate = false;
-
 	private String coverImg;// base64 image
 
 	private Boolean authorizationRequired;
