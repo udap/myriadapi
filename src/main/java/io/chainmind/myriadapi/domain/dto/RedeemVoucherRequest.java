@@ -6,6 +6,8 @@ import io.chainmind.myriadapi.domain.CodeType;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Map;
+
 @Getter
 @Setter
 public class RedeemVoucherRequest {
@@ -17,6 +19,8 @@ public class RedeemVoucherRequest {
 	private String merchantCode;
 	@NotBlank
 	private String orderId;
+	// extra data
+	private Map<String, Object> metadata;
 	
 	private CodeType idType = CodeType.ID;
 	private CodeType codeType = CodeType.ID;
