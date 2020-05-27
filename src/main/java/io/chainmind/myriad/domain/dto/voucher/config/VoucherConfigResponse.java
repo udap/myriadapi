@@ -11,7 +11,7 @@ public class VoucherConfigResponse extends IdResponse {
 	// voucher type
 	private VoucherType type;
 
-	//private String name;
+	private String name;
 	private String description;
 	private Integer redemption;
 	private Boolean authorizationRequired;
