@@ -2,11 +2,10 @@ package io.chainmind.myriadapi.domain.dto;
 
 import javax.validation.constraints.NotBlank;
 
+import io.chainmind.myriad.domain.common.Order;
 import io.chainmind.myriadapi.domain.CodeType;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.Map;
 
 @Getter
 @Setter
@@ -19,8 +18,8 @@ public class RedeemVoucherRequest {
 	private String merchantCode;
 	@NotBlank
 	private String orderId;
-	// extra data
-	private Map<String, Object> metadata;
+	
+	private Order order;
 	
 	private CodeType idType = CodeType.ID;
 	private CodeType codeType = CodeType.ID;

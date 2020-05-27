@@ -1,5 +1,8 @@
 package io.chainmind.myriadapi.web.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +49,11 @@ public class RedemptionController {
 			throw new ApiException(HttpStatus.NOT_FOUND, "request user not found");
 		redeemReq.setCustomerId(account.getId().toString());
 		redeemReq.setReqUser(redeemReq.getCustomerId());
+		if (req.getOrder() != null) {
+			Map<String, Object> metadata = new HashMap<>();
+			metadata.put("order", req.getOrder());
+			redeemReq.setMetadata(metadata);
+		}
 		return redemptionClient.createRedemption(redeemReq);
 	}
 	
