@@ -1,8 +1,10 @@
 package io.chainmind.myriad.domain.common;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.List;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,48 +16,27 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 public class Order {
-	// order id
+	@NotBlank
 	private String id;
 	// total amount in cent (x100)
-	private int amount;
+	private Integer amount;
 	// total quantity
-	private int quantity;
-	// order items, key is product SKU
-	private Map<String, OrderItem> items;
-
-	public Order addItem(OrderItem item) {
-		if (items == null)
-			items = new HashMap<>();
-		items.put(item.getSku(),item);
-		return this;
-	}
-	
-	public boolean hasSku(String sku) {
-		if (items == null)
-			return false;
-		return items.containsKey(sku);
-	}
-	
-	public int countSku(String sku) {
-		if (items == null || !items.containsKey(sku))
-			return 0;
-		return items.get(sku).getQuantity();
-	}
-	
-	public boolean hasItemsInCategory(String category) {
-		if (items == null)
-			return false;
-		return items.values().stream().anyMatch(item->Objects.equals(item.getCategory(), category));		
-	}
+	private Integer quantity;
+	// order items
+	private List<OrderItem> items;
 	
 	@Data
 	static class OrderItem {
+		@NotBlank
 		private String sku;
 		private String product;
 		private String category;
 		// real price x 100
-		private int price;
+		@PositiveOrZero
+		private Integer price;
 		// number of product
-		private int quantity;
+		@Positive
+		private Integer quantity;
 	}
+	
 }
