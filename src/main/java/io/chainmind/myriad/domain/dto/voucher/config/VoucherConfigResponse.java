@@ -1,5 +1,7 @@
 package io.chainmind.myriad.domain.dto.voucher.config;
 
+import java.time.LocalDate;
+
 import io.chainmind.myriad.domain.common.VoucherType;
 import io.chainmind.myriad.domain.dto.IdResponse;
 import lombok.Getter;
@@ -13,6 +15,11 @@ public class VoucherConfigResponse extends IdResponse {
 
 	private String name;
 	private String description;
+	
+	private LocalDate effective;
+	private LocalDate expiry;
+	private Integer daysAfterDist;
+
 	private Integer redemption;
 	private Boolean authorizationRequired;
 	// bulk code or fixed code
