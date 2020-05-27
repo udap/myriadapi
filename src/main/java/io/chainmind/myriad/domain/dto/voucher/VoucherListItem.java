@@ -1,6 +1,6 @@
 package io.chainmind.myriad.domain.dto.voucher;
 
-import io.chainmind.myriad.domain.dto.voucher.config.VoucherConfigResponse;
+import io.chainmind.myriad.domain.dto.voucher.config.SimpleVoucherConfig;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,5 +8,5 @@ import lombok.Setter;
 @Setter
 public class VoucherListItem extends VoucherSummary {
 	private int merchantCount;
-	private VoucherConfigResponse config;
+	private SimpleVoucherConfig config;
 }
