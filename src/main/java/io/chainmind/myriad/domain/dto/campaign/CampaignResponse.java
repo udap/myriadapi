@@ -7,7 +7,7 @@ import java.util.Set;
 
 import io.chainmind.myriad.domain.dto.IdResponse;
 import io.chainmind.myriad.domain.dto.promotion.TierResponse;
-import io.chainmind.myriad.domain.dto.rule.RuleResponse;
+import io.chainmind.myriad.domain.dto.rule.ValidationDTO;
 import io.chainmind.myriad.domain.dto.voucher.config.VoucherConfigResponse;
 import lombok.Getter;
 import lombok.Setter;
@@ -38,7 +38,7 @@ public class CampaignResponse extends IdResponse {
 	private Set<TierResponse> tiers;
 
 	// VOUCHER 的字段
-	private Set<RuleResponse> rules;
+	private Set<ValidationDTO> rules;
 	private VoucherConfigResponse voucherConfig;
 
 }
