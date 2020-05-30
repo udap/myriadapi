@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import io.chainmind.myriadapi.CacheConfiguration;
 import io.chainmind.myriadapi.domain.CodeType;
+import io.chainmind.myriadapi.domain.RequestOrg;
 import io.chainmind.myriadapi.domain.entity.Account;
 import io.chainmind.myriadapi.domain.exception.ApiException;
 import io.chainmind.myriadapi.persistence.repository.AccountRepository;
@@ -21,6 +22,8 @@ public class AccountServiceImpl implements AccountService {
 
 	@Autowired
 	private AccountRepository accountRepo;
+	@Autowired
+	private RequestOrg requestOrg;
 	
 	@Cacheable(value = CacheConfiguration.ACCOUNT_BY_CODE_CACHE, unless="#result == null")
 	@Override
@@ -42,7 +45,8 @@ public class AccountServiceImpl implements AccountService {
 	
 	@Override
 	public Account register(String code, CodeType codeType) {
-		if (!CodeType.CELLPHONE.equals(codeType) && !CodeType.EMAIL.equals(codeType))
+		if (!CodeType.CELLPHONE.equals(codeType) && !CodeType.EMAIL.equals(codeType)
+				&& !CodeType.SOURCE_ID.equals(codeType))
 			throw new ApiException(HttpStatus.BAD_REQUEST, "非法的ID类型");
 
 		Account account = new Account();
@@ -60,6 +64,13 @@ public class AccountServiceImpl implements AccountService {
 			if (!CommonUtils.validateEmail(code))
 				throw new ApiException(HttpStatus.BAD_REQUEST, "非法的电子邮件地址");
 		}
+		
+		if (CodeType.SOURCE_ID.equals(codeType))
+			account.setSourceId(code);
+
+		// IMPORTANT
+		account.setAppId(requestOrg.getAppId());
+		
 		return accountRepo.save(account);
 	}
 

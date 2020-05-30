@@ -1,5 +1,7 @@
 package io.chainmind.myriadapi.client;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.cloud.openfeign.FeignClient;
@@ -30,6 +32,7 @@ import io.chainmind.myriad.domain.dto.redemption.CreateRedemptionRequest;
 import io.chainmind.myriad.domain.dto.redemption.CreateRedemptionResponse;
 import io.chainmind.myriad.domain.dto.voucher.BatchTransferRequest;
 import io.chainmind.myriad.domain.dto.voucher.BatchTransferResponse;
+import io.chainmind.myriad.domain.dto.voucher.QualifyRequest;
 import io.chainmind.myriad.domain.dto.voucher.TransferVoucherRequest;
 import io.chainmind.myriad.domain.dto.voucher.TransferVoucherResponse;
 import io.chainmind.myriad.domain.dto.voucher.UsageStatus;
@@ -71,7 +74,9 @@ public interface VoucherClient {
     
     @PostMapping("/vouchers/batchTransfer")
     BatchTransferResponse batchTransfer(@RequestBody @Valid BatchTransferRequest req);
-
+    
+    @PostMapping("/vouchers/qualify")
+    List<VoucherListItem> qualify(@Valid @RequestBody QualifyRequest req);
 
 	@PostMapping("/distributions")
 	DistributeVoucherResponse distributeVoucher(@Valid @RequestBody DistributeVoucherRequest req);

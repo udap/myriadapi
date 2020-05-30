@@ -28,6 +28,7 @@ import io.chainmind.myriad.domain.common.VoucherType;
 import io.chainmind.myriad.domain.dto.PaginatedResponse;
 import io.chainmind.myriad.domain.dto.voucher.BatchTransferRequest;
 import io.chainmind.myriad.domain.dto.voucher.BatchTransferResponse;
+import io.chainmind.myriad.domain.dto.voucher.QualifyRequest;
 import io.chainmind.myriad.domain.dto.voucher.TransferVoucherRequest;
 import io.chainmind.myriad.domain.dto.voucher.TransferVoucherResponse;
 import io.chainmind.myriad.domain.dto.voucher.UsageStatus;
@@ -37,6 +38,7 @@ import io.chainmind.myriadapi.client.VoucherClient;
 import io.chainmind.myriadapi.domain.CodeType;
 import io.chainmind.myriadapi.domain.RequestOrg;
 import io.chainmind.myriadapi.domain.dto.OrgDTO;
+import io.chainmind.myriadapi.domain.dto.QualifyCouponRequest;
 import io.chainmind.myriadapi.domain.dto.VoucherDetailsResponse;
 import io.chainmind.myriadapi.domain.entity.Account;
 import io.chainmind.myriadapi.domain.entity.Organization;
@@ -159,6 +161,27 @@ public class VoucherController {
     		throw new ApiException(HttpStatus.FORBIDDEN, "batchTransfer.invalidParams");
 
     	return voucherClient.batchTransfer(req);
+    }
+    
+    @PostMapping("/qualify")
+    public List<VoucherListItem> qualifyCoupons(@Valid @RequestBody QualifyCouponRequest req) {
+    	String merchantId = merchantService.getId(req.getMerchantCode().getId(), req.getMerchantCode().getType());
+    	if (!StringUtils.hasText(merchantId))
+    		throw new ApiException(HttpStatus.NOT_FOUND, "merchant.notFound");
+    	
+    	Account account = accountService.findByCode(req.getCustomerCode().getId(), req.getCustomerCode().getType());
+    	if (account == null) {
+    		// create an account
+    		account = accountService.register(req.getCustomerCode().getId(), req.getCustomerCode().getType());
+    	}
+    	
+    	return voucherClient.qualify(QualifyRequest.builder()
+    			.customerId(account.getId().toString())
+    			.limit(req.getLimit())
+    			.merchantId(merchantId)
+    			.order(req.getOrder())
+    			.voucherType(VoucherType.COUPON)
+    			.build());
     }
 
 
