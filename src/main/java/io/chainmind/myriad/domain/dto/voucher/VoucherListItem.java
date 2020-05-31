@@ -7,6 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class VoucherListItem extends VoucherSummary {
-	private int merchantCount;
+	private Integer merchantCount;
 	private SimpleVoucherConfig config;
 }
