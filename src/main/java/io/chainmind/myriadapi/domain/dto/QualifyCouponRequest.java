@@ -13,6 +13,6 @@ public class QualifyCouponRequest {
 	private Code merchantCode;
 	// the order which qualified vouchers will be applied to
 	private Order order;
-	private int limit = 100;
+	private Integer limit = 100;
 
 }
