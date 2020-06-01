@@ -22,7 +22,6 @@ import io.chainmind.myriadapi.domain.entity.Account;
 import io.chainmind.myriadapi.domain.entity.Organization;
 import io.chainmind.myriadapi.domain.exception.ApiException;
 import io.chainmind.myriadapi.service.AccountService;
-import io.chainmind.myriadapi.service.AuthorizedMerchantService;
 import io.chainmind.myriadapi.service.OrganizationService;
 
 @RestController
@@ -34,8 +33,6 @@ public class CampaignController {
 	private AccountService accountService;
 	@Autowired
 	private OrganizationService orgService;
-	@Autowired
-	private AuthorizedMerchantService authorizedMerchantService;
 	
     @GetMapping
     public Page<CampaignListItemResponse> listCampaigns(
@@ -57,7 +54,7 @@ public class CampaignController {
     	}
     	
     	if (StringUtils.hasText(partyId)) {
-	    	partyId = authorizedMerchantService.getId(partyId, partyIdType);
+	    	partyId = orgService.findByCode(partyId, partyIdType).getId().toString();
     	}
     	
     	if (!StringUtils.hasText(participantId) && !StringUtils.hasText(partyId))

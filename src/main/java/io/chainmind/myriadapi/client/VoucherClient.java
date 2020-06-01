@@ -33,6 +33,7 @@ import io.chainmind.myriad.domain.dto.redemption.CreateRedemptionResponse;
 import io.chainmind.myriad.domain.dto.voucher.BatchTransferRequest;
 import io.chainmind.myriad.domain.dto.voucher.BatchTransferResponse;
 import io.chainmind.myriad.domain.dto.voucher.QualifyRequest;
+import io.chainmind.myriad.domain.dto.voucher.QualifyResult;
 import io.chainmind.myriad.domain.dto.voucher.TransferVoucherRequest;
 import io.chainmind.myriad.domain.dto.voucher.TransferVoucherResponse;
 import io.chainmind.myriad.domain.dto.voucher.UsageStatus;
@@ -62,7 +63,7 @@ public interface VoucherClient {
             @RequestParam(required = false) String merchantId,
             @RequestParam(required = false, defaultValue="COUPON") VoucherType type,
             @RequestParam(required = false) UsageStatus status,
-            @RequestParam(required = false, defaultValue="false") Boolean includeIssued,
+            @RequestParam(required = false, defaultValue="false") Boolean excludeIssued,
             @RequestParam(required = false)String searchTxt);
 	
     @GetMapping("/vouchers/{id}")
@@ -75,8 +76,8 @@ public interface VoucherClient {
     @PostMapping("/vouchers/batchTransfer")
     BatchTransferResponse batchTransfer(@RequestBody @Valid BatchTransferRequest req);
     
-    @PostMapping("/vouchers/qualify")
-    List<VoucherListItem> qualify(@Valid @RequestBody QualifyRequest req);
+    @PostMapping("/vouchers/{id}/qualify")
+    QualifyResult qualify(@PathVariable(name = "id") String voucherId, @Valid @RequestBody QualifyRequest req);
 
 	@PostMapping("/distributions")
 	DistributeVoucherResponse distributeVoucher(@Valid @RequestBody DistributeVoucherRequest req);

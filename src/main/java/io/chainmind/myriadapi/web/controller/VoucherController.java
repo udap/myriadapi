@@ -1,7 +1,9 @@
 package io.chainmind.myriadapi.web.controller;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -10,6 +12,7 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -24,16 +27,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.chainmind.myriad.domain.common.DiscountType;
+import io.chainmind.myriad.domain.common.Merchant;
+import io.chainmind.myriad.domain.common.Order;
 import io.chainmind.myriad.domain.common.VoucherType;
 import io.chainmind.myriad.domain.dto.PaginatedResponse;
 import io.chainmind.myriad.domain.dto.voucher.BatchTransferRequest;
 import io.chainmind.myriad.domain.dto.voucher.BatchTransferResponse;
 import io.chainmind.myriad.domain.dto.voucher.QualifyRequest;
+import io.chainmind.myriad.domain.dto.voucher.QualifyResult;
 import io.chainmind.myriad.domain.dto.voucher.TransferVoucherRequest;
 import io.chainmind.myriad.domain.dto.voucher.TransferVoucherResponse;
 import io.chainmind.myriad.domain.dto.voucher.UsageStatus;
 import io.chainmind.myriad.domain.dto.voucher.VoucherListItem;
 import io.chainmind.myriad.domain.dto.voucher.VoucherResponse;
+import io.chainmind.myriad.domain.dto.voucher.config.DiscountResponse;
+import io.chainmind.myriad.domain.dto.voucher.config.SimpleVoucherConfig;
 import io.chainmind.myriadapi.client.VoucherClient;
 import io.chainmind.myriadapi.domain.CodeType;
 import io.chainmind.myriadapi.domain.RequestOrg;
@@ -41,6 +50,7 @@ import io.chainmind.myriadapi.domain.dto.OrgDTO;
 import io.chainmind.myriadapi.domain.dto.QualifyCouponRequest;
 import io.chainmind.myriadapi.domain.dto.VoucherDetailsResponse;
 import io.chainmind.myriadapi.domain.entity.Account;
+import io.chainmind.myriadapi.domain.entity.AuthorizedMerchant;
 import io.chainmind.myriadapi.domain.entity.Organization;
 import io.chainmind.myriadapi.domain.exception.ApiException;
 import io.chainmind.myriadapi.service.AccountService;
@@ -83,25 +93,36 @@ public class VoucherController {
 			// try to register an account
 			if(!CodeType.ID.equals(idType))
 				account = accountService.register(ownerId, idType);	
-			// return an empty page
-			PaginatedResponse<VoucherListItem> response = new PaginatedResponse<VoucherListItem>();
-			response.setPage(0);
-			response.setSize(0);
-			response.setTotal(0);
-			response.setEntries(Collections.emptyList());
-			return response;
+			// new account, return an empty list response
+			return emptyResponse();
 		}
+		LOG.debug("getVouchers.account: {}", account.getId());
 		
-		LOG.debug("account: "+ account.getId());
-				
 		// query merchant id
-		String merchantId = StringUtils.hasText(merchantCode)
-				?merchantService.getId(merchantCode, codeType):null;
+		String merchantId = null;
+		if (StringUtils.hasText(merchantCode)) {
+			try {
+				Organization merchant = organizationService.findByCode(merchantCode, codeType);
+				merchantId = merchant.getId().toString();
+			} catch(Exception e) {
+				LOG.info("getVouchers.merchant({}): {}", merchantCode, e.getMessage());
+				return emptyResponse();
+			}
+		}
+		LOG.debug("getVouchers.merchantId: {}", merchantId);
 		
-		LOG.debug("merchant id: "+ merchantId);
 		// excludes NEW vouchers
 		return voucherClient.queryVouchers(pageable, account.getId().toString(), null, null, 
 				merchantId, type, status, true, null);
+	}
+	
+	private PaginatedResponse<VoucherListItem> emptyResponse() {
+		PaginatedResponse<VoucherListItem> response = new PaginatedResponse<VoucherListItem>();
+		response.setPage(0);
+		response.setSize(0);
+		response.setTotal(0);
+		response.setEntries(Collections.emptyList());
+		return response;		
 	}
 	
     @GetMapping("/{id}")
@@ -165,9 +186,7 @@ public class VoucherController {
     
     @PostMapping("/qualify")
     public List<VoucherListItem> qualifyCoupons(@Valid @RequestBody QualifyCouponRequest req) {
-    	String merchantId = merchantService.getId(req.getMerchantCode().getId(), req.getMerchantCode().getType());
-    	if (!StringUtils.hasText(merchantId))
-    		throw new ApiException(HttpStatus.NOT_FOUND, "merchant.notFound");
+    	Organization merchant = organizationService.findByCode(req.getMerchantCode().getId(), req.getMerchantCode().getType());
     	
     	Account account = accountService.findByCode(req.getCustomerCode().getId(), req.getCustomerCode().getType());
     	if (account == null) {
@@ -175,14 +194,90 @@ public class VoucherController {
     		account = accountService.register(req.getCustomerCode().getId(), req.getCustomerCode().getType());
     	}
     	
-    	return voucherClient.qualify(QualifyRequest.builder()
-    			.customerId(account.getId().toString())
-    			.limit(req.getLimit())
-    			.merchantId(merchantId)
-    			.order(req.getOrder())
-    			.voucherType(VoucherType.COUPON)
-    			.build());
+    	List<VoucherListItem> qualifiedVouchers = new ArrayList<>();
+
+    	int totalPages = 0;
+    	int page = 0;
+    	do {
+    		// query active vouchers excluding NEW vouchers (do not specify merchant id because rules may be 
+        	// based on merchant tags rather than specific merchant)
+	    	PaginatedResponse<VoucherListItem> vouchers = voucherClient.queryVouchers(PageRequest.of(page++, req.getLimit()), 
+	    			account.getId().toString(), null, null, null, 
+	    			VoucherType.COUPON, UsageStatus.ACTIVE, true, null);
+	    	totalPages = vouchers.getTotal();
+	    	for (VoucherListItem v : vouchers.getEntries()) {
+				Organization marketer = organizationService.findById(Long.valueOf(v.getIssuer()));
+	    		AuthorizedMerchant am = merchantService.find(marketer, merchant);
+	    		if (am == null)
+	    			continue;
+	    		Merchant m = Merchant.builder()
+	    				.id(merchant.getId().toString())
+	    				.province(merchant.getProvince())
+	    				.city(merchant.getCity())
+	    				.district(merchant.getDistrict())
+	    				.tags(am.getTags())
+	    				.build();
+	    		QualifyResult result = voucherClient.qualify(v.getId(), QualifyRequest.builder()
+	    				.customerId(account.getId().toString())
+	    				.merchant(m)
+	    				.order(req.getOrder())
+	    				.voucherId(v.getId())
+	    				.build());
+	    		if (result.isQualified())
+	    			qualifiedVouchers.add(v);
+	    	
+	    		if (qualifiedVouchers.size()>=req.getLimit())
+	    			break;
+	    	}
+	    	
+    	} while (page < totalPages && qualifiedVouchers.size() < req.getLimit());
+    	
+    	// sort by discount value
+    	Collections.sort(qualifiedVouchers, new Comparator<VoucherListItem>() {
+			@Override
+			public int compare(VoucherListItem v1, VoucherListItem v2) {
+				SimpleVoucherConfig c1 = v1.getConfig();
+				SimpleVoucherConfig c2 = v2.getConfig();
+				
+				// calculate discount value
+				Integer valueOff1 = discountAmount(c1.getDiscount(), req.getOrder());
+				Integer valueOff2 = discountAmount(c2.getDiscount(), req.getOrder());
+				
+				//no order
+				if (req.getOrder() == null || req.getOrder().getAmount() == null) {
+					if (c1.getDiscount().getType().equals(c2.getDiscount().getType()))
+						return valueOff2.compareTo(valueOff1);
+					else 
+						return c2.getDiscount().getType().compareTo(c1.getDiscount().getType());   						
+				} 
+				
+				if (valueOff1 == valueOff2)
+					return v1.getExpiry().compareTo(v2.getExpiry());
+				else
+					return valueOff2.compareTo(valueOff1);
+			}
+    	});
+    	
+    	
+    	return qualifiedVouchers;
     }
+    
+    private Integer discountAmount(DiscountResponse discount, Order order) {
+    	if (order == null || order.getAmount() == null)
+    		return discount.getValueOff();
+    	if (discount.getType().equals(DiscountType.AMOUNT))
+    		return discount.getValueOff();
+    	else if (discount.getType().equals(DiscountType.PERCENT)) {
+    		int valueOff = BigDecimal.valueOf(discount.getValueOff())
+    				.divide(BigDecimal.valueOf(100))
+    				.multiply(BigDecimal.valueOf(order.getAmount())).intValue();
+    		if (discount.getAmountLimit()!=null)
+    			valueOff = valueOff > discount.getAmountLimit()? discount.getAmountLimit() : valueOff;
+    		return valueOff;
+    	}
+    	return 0;
+    }
+
 
 
 }

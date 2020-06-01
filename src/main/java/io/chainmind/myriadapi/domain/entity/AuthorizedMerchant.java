@@ -22,4 +22,6 @@ public class AuthorizedMerchant extends AuditableEntity {
 	@JoinColumn(name = "merchant_id")	
 	private Organization merchant;
 
+	private String tags;
+
 }

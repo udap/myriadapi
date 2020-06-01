@@ -7,23 +7,29 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.chainmind.myriad.domain.common.Merchant;
 import io.chainmind.myriad.domain.dto.redemption.ConfirmRedemptionRequest;
 import io.chainmind.myriad.domain.dto.redemption.ConfirmRedemptionResponse;
 import io.chainmind.myriad.domain.dto.redemption.CreateRedemptionRequest;
 import io.chainmind.myriad.domain.dto.redemption.CreateRedemptionResponse;
 import io.chainmind.myriadapi.client.VoucherClient;
+import io.chainmind.myriadapi.domain.RequestOrg;
 import io.chainmind.myriadapi.domain.dto.CompleteRedemptionRequest;
 import io.chainmind.myriadapi.domain.dto.RedeemVoucherRequest;
 import io.chainmind.myriadapi.domain.entity.Account;
+import io.chainmind.myriadapi.domain.entity.AuthorizedMerchant;
+import io.chainmind.myriadapi.domain.entity.Organization;
 import io.chainmind.myriadapi.domain.exception.ApiException;
 import io.chainmind.myriadapi.service.AccountService;
 import io.chainmind.myriadapi.service.AuthorizedMerchantService;
+import io.chainmind.myriadapi.service.OrganizationService;
 
 @RestController
 @RequestMapping("/api/redemptions")
@@ -35,20 +41,37 @@ public class RedemptionController {
 	private AccountService accountService;
 	@Autowired
 	private AuthorizedMerchantService merchantService;
+	@Autowired
+	private OrganizationService organizationService;
+	@Autowired
+	private RequestOrg requestOrg;
 
 	@PostMapping
 	public CreateRedemptionResponse create(@Valid @RequestBody RedeemVoucherRequest req) {
-		merchantService.getId(req.getMerchantCode(), req.getCodeType());
-		
 		CreateRedemptionRequest redeemReq = new CreateRedemptionRequest();
 		redeemReq.setOrderId(req.getOrderId());
 		redeemReq.setVoucherId(req.getVoucherId());
-		redeemReq.setMerchantId(merchantService.getId(req.getMerchantCode(), req.getCodeType()));
+		// query account
 		Account account = accountService.findByCode(req.getReqUserId(), req.getIdType());
 		if (account == null)
 			throw new ApiException(HttpStatus.NOT_FOUND, "request user not found");
 		redeemReq.setCustomerId(account.getId().toString());
 		redeemReq.setReqUser(redeemReq.getCustomerId());
+		// query merchant
+		Organization merchant = organizationService.findByCode(req.getMerchantCode(), req.getCodeType());
+		Organization marketer = requestOrg.getAppOrg();
+		if (StringUtils.hasText(req.getIssuerId()))
+			marketer = organizationService.findById(Long.valueOf(req.getIssuerId()));
+		AuthorizedMerchant am = merchantService.find(marketer, merchant);
+		if (am == null)
+			throw new ApiException(HttpStatus.FORBIDDEN, "merchant.notAuthorized");
+		redeemReq.setMerchant(Merchant.builder()
+				.id(merchant.getId().toString())
+				.province(merchant.getProvince())
+				.city(merchant.getCity())
+				.district(merchant.getDistrict())
+				.tags(am.getTags())
+				.build());
 		if (req.getOrder() != null) {
 			Map<String, Object> metadata = new HashMap<>();
 			metadata.put("order", req.getOrder());
@@ -63,7 +86,8 @@ public class RedemptionController {
 		confirmReq.setVoucherId(req.getVoucherId());
 		confirmReq.setOrderId(req.getOrderId());
 		confirmReq.setStatus(req.getStatus());
-		confirmReq.setMerchantId(merchantService.getId(req.getMerchantCode(), req.getCodeType()));
+		Organization merchant = organizationService.findByCode(req.getMerchantCode(), req.getCodeType());
+		confirmReq.setMerchantId(merchant.getId().toString());
 		return redemptionClient.confirmRedemption(confirmReq);
 	}
 }

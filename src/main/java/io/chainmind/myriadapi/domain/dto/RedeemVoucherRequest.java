@@ -18,6 +18,8 @@ public class RedeemVoucherRequest {
 	private String merchantCode;
 	@NotBlank
 	private String orderId;
+
+	private String issuerId;
 	
 	private Order order;
 	

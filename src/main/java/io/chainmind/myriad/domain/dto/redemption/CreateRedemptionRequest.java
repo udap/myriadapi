@@ -3,7 +3,9 @@ package io.chainmind.myriad.domain.dto.redemption;
 import java.util.Map;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
+import io.chainmind.myriad.domain.common.Merchant;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,8 +19,8 @@ public class CreateRedemptionRequest {
 	@NotBlank
 	private String reqUser;
 	// the merchant that redeems the voucher
-	@NotBlank
-	private String merchantId;
+	@NotNull
+	private Merchant merchant;
 	
 	@NotBlank
 	private String orderId;
