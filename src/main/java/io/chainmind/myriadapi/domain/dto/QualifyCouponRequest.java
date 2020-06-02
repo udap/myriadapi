@@ -11,6 +11,7 @@ public class QualifyCouponRequest {
 	private Code customerCode;
 	@NotNull
 	private Code merchantCode;
+	
 	// the order which qualified vouchers will be applied to
 	private Order order;
 	private Integer limit = 100;

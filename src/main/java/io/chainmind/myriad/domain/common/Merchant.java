@@ -14,5 +14,5 @@ public class Merchant {
 	private String city;
 	private String district;
 	private String tags;
-
+	private Merchant topAncestor;
 }

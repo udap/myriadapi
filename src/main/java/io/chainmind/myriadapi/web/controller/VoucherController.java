@@ -187,6 +187,8 @@ public class VoucherController {
     @PostMapping("/qualify")
     public List<VoucherListItem> qualifyCoupons(@Valid @RequestBody QualifyCouponRequest req) {
     	Organization merchant = organizationService.findByCode(req.getMerchantCode().getId(), req.getMerchantCode().getType());
+		Organization topAncestor = organizationService.findTopAncestor(merchant);
+		boolean isTopAncestor = Objects.equals(topAncestor.getId(), merchant.getId());
     	
     	Account account = accountService.findByCode(req.getCustomerCode().getId(), req.getCustomerCode().getType());
     	if (account == null) {
@@ -208,14 +210,24 @@ public class VoucherController {
 	    	for (VoucherListItem v : vouchers.getEntries()) {
 				Organization marketer = organizationService.findById(Long.valueOf(v.getIssuer()));
 	    		AuthorizedMerchant am = merchantService.find(marketer, merchant);
-	    		if (am == null)
+	    		AuthorizedMerchant amAncestor = (isTopAncestor)?am:merchantService.find(marketer, topAncestor);
+	    		// neither merchant nor its top ancestor is not authorized 
+	    		if (am == null && amAncestor == null)
 	    			continue;
+	    		Merchant mAncestor = isTopAncestor? null: Merchant.builder()
+	    				.id(topAncestor.getId().toString())
+	    				.province(topAncestor.getProvince())
+	    				.city(topAncestor.getCity())
+	    				.district(topAncestor.getDistrict())
+	    				.tags(amAncestor.getTags())
+	    				.build();
 	    		Merchant m = Merchant.builder()
 	    				.id(merchant.getId().toString())
 	    				.province(merchant.getProvince())
 	    				.city(merchant.getCity())
 	    				.district(merchant.getDistrict())
-	    				.tags(am.getTags())
+	    				.tags((am!=null)?am.getTags():null)
+	    				.topAncestor(mAncestor)
 	    				.build();
 	    		QualifyResult result = voucherClient.qualify(v.getId(), QualifyRequest.builder()
 	    				.customerId(account.getId().toString())
