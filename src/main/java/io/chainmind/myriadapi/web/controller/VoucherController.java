@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -77,14 +78,15 @@ public class VoucherController {
 	
 	@GetMapping
 	public PaginatedResponse<VoucherListItem> getVouchers(
-            @PageableDefault(size = 20, sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable,
+            @PageableDefault(page=0, size = 20) @SortDefault.SortDefaults({
+                @SortDefault(sort = "createdAt", direction = Sort.Direction.DESC)}) Pageable pageable,
             @RequestParam(name="ownerId", required = true) String ownerId,
             @RequestParam(name="status", required = false) UsageStatus status,
             @RequestParam(name="merchantCode", required = false) String merchantCode,
             @RequestParam(name="idType", required = false, defaultValue="ID") CodeType idType,
             @RequestParam(name="codeType", required = false, defaultValue="ID") CodeType codeType,
             @RequestParam(name="type", required = false, defaultValue="COUPON") VoucherType type) {
-		LOG.debug("ownerId: " + ownerId + ", idType: " + idType);
+		LOG.debug("GET /api/vouchers: sorts: {}", pageable.getSort());
 		// query account id based on given ownerId and idType
 		Account account = accountService.findByCode(ownerId, idType);	
 		
