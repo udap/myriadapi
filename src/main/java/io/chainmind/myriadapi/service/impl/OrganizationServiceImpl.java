@@ -48,8 +48,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         	if (merchantOpt.isPresent())
         		merchant = merchantOpt.get();
         }
-            
-        if (codeType.equals(CodeType.LICENSE))
+        else if (codeType.equals(CodeType.LICENSE))
             merchant = orgRepo.findTopByLicenseNo(code);
         else if (codeType.equals(CodeType.UPCODE))
             merchant = orgRepo.findTopByUpCode(code);
