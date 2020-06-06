@@ -13,10 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,6 +53,7 @@ import io.chainmind.myriadapi.domain.exception.ApiException;
 import io.chainmind.myriadapi.service.AccountService;
 import io.chainmind.myriadapi.service.AuthorizedMerchantService;
 import io.chainmind.myriadapi.service.OrganizationService;
+import io.chainmind.myriadapi.utils.CommonUtils;
 
 @RestController
 @RequestMapping("/api/vouchers")
@@ -78,15 +75,18 @@ public class VoucherController {
 	
 	@GetMapping
 	public PaginatedResponse<VoucherListItem> getVouchers(
-            @PageableDefault(page=0, size = 20) @SortDefault.SortDefaults({
-                @SortDefault(sort = "createdAt", direction = Sort.Direction.DESC)}) Pageable pageable,
+            @RequestParam(name="page", required=false, defaultValue="0") int page,
+            @RequestParam(name="size", required=false, defaultValue="20") int size,
+            @RequestParam(name="sort", required=false, defaultValue="createdAt:desc") String sort,
             @RequestParam(name="ownerId", required = true) String ownerId,
             @RequestParam(name="status", required = false) UsageStatus status,
             @RequestParam(name="merchantCode", required = false) String merchantCode,
             @RequestParam(name="idType", required = false, defaultValue="ID") CodeType idType,
             @RequestParam(name="codeType", required = false, defaultValue="ID") CodeType codeType,
             @RequestParam(name="type", required = false, defaultValue="COUPON") VoucherType type) {
-		LOG.debug("GET /api/vouchers: sorts: {}", pageable.getSort());
+		
+		PageRequest pageRequest = PageRequest.of(page, size, CommonUtils.parseSort(sort));
+		LOG.debug("GET /api/vouchers: sorts: {}", pageRequest.getSort());
 		// query account id based on given ownerId and idType
 		Account account = accountService.findByCode(ownerId, idType);	
 		
@@ -114,7 +114,7 @@ public class VoucherController {
 		LOG.debug("getVouchers.merchantId: {}", merchantId);
 		
 		// excludes NEW vouchers
-		return voucherClient.queryVouchers(pageable, account.getId().toString(), null, null, 
+		return voucherClient.queryVouchers(pageRequest, account.getId().toString(), null, null, 
 				merchantId, type, status, true, null);
 	}
 	

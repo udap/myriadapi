@@ -1,8 +1,11 @@
 package io.chainmind.myriadapi.utils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Sort;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 public class CommonUtils {	
@@ -88,5 +91,27 @@ public class CommonUtils {
 		return code == null ? false : code.matches(REGEX_PHONE_CODE);
 	}
 	
-
+	/**
+	 * 
+	 * @param orderby must be in the format "attr1:asc|desc,attr2:asc|desc,...",e.g, "usability:desc,expiry,campaign:desc"
+	 * @return
+	 */
+	public static Sort parseSort(String orderby) {
+		if (!StringUtils.hasText(orderby))
+			return Sort.unsorted();
+		List<Sort.Order> orders = new ArrayList<>();
+		StringUtils.commaDelimitedListToSet(orderby).forEach(order->{
+			if (!order.contains(":"))
+				orders.add(Sort.Order.asc(order));
+			else {
+				int index = order.indexOf(':');
+				String dir = order.substring(index+1);
+				if (dir.equalsIgnoreCase("DESC"))
+					orders.add(Sort.Order.desc(order.substring(0,index)));
+				else if (dir.equalsIgnoreCase("ASC"))
+					orders.add(Sort.Order.asc(order.substring(0,index)));
+			}
+		});
+		return Sort.by(orders);
+	}
 }
