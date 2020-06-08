@@ -10,13 +10,17 @@ import io.chainmind.myriadapi.domain.entity.Organization;
 public interface OrganizationRepository
 		extends JpaRepository<Organization, Long>, JpaSpecificationExecutor<Organization> {
 
-	Organization findTopByLicenseNo(String code);
+	@Query("SELECT org  FROM Organization org WHERE org.licenseNo = :licenseNo AND org.status != 'DELETED' ")
+	Organization findByLicenseNo(@Param("licenseNo")String licenseNo);
 
-	Organization findTopByUpCode(String code);
+	@Query("SELECT org  FROM Organization org WHERE org.upCode = :upCode AND org.status != 'DELETED'")
+	Organization findByUpCode(@Param("upCode")String upCode);
 
-	Organization findTopByWpCode(String code);
+	@Query("SELECT org  FROM Organization org WHERE org.wpCode = :wpCode AND org.status != 'DELETED'")
+	Organization findByWpCode(@Param("wpCode")String wpCode);
 
-	Organization findTopByApCode(String code);
+	@Query("SELECT org  FROM Organization org WHERE org.apCode = :apCode AND org.status != 'DELETED' ")
+	Organization findByApCode(@Param("apCode")String apCode);
 
 	@Query("SELECT o from Organization o JOIN OrganizationClosure c ON c.ancestor = o "
 			+ "WHERE c.descendant = :org and c.pathLength>=0 and o.parent is null and o.status != 'DELETED'")

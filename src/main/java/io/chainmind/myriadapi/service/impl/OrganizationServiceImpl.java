@@ -49,13 +49,13 @@ public class OrganizationServiceImpl implements OrganizationService {
         		merchant = merchantOpt.get();
         }
         else if (codeType.equals(CodeType.LICENSE))
-            merchant = orgRepo.findTopByLicenseNo(code);
+            merchant = orgRepo.findByLicenseNo(code);
         else if (codeType.equals(CodeType.UPCODE))
-            merchant = orgRepo.findTopByUpCode(code);
+            merchant = orgRepo.findByUpCode(code);
         else if (codeType.equals(CodeType.APCODE))
-            merchant = orgRepo.findTopByApCode(code);
+            merchant = orgRepo.findByApCode(code);
         else if (codeType.equals(CodeType.WPCODE))
-            merchant = orgRepo.findTopByWpCode(code);
+            merchant = orgRepo.findByWpCode(code);
         else
             throw new ApiException(HttpStatus.BAD_REQUEST, "unknown code type");
 
