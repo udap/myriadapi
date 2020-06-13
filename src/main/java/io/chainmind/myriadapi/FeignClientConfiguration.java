@@ -22,7 +22,7 @@ public class FeignClientConfiguration {
 	private String clientSecret;
 
     @Bean
-    public RequestInterceptor requestInterceptor() {
+    public OAuth2FeignRequestInterceptor requestInterceptor() {
         return new OAuth2FeignRequestInterceptor(new DefaultOAuth2ClientContext(), resource());
     }
     @Bean
