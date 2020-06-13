@@ -3,6 +3,7 @@ package io.chainmind.myriadapi.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.chainmind.myriadapi.domain.RequestUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +24,8 @@ public class DistributionServiceImpl implements DistributionService {
 
 	@Autowired
 	private VoucherClient voucherClient;
+	@Autowired
+	private RequestUser requestUser;
 	@Autowired
 	private CustomerService customerService;
 	
@@ -46,6 +49,7 @@ public class DistributionServiceImpl implements DistributionService {
 
 		BatchDistributionResponse resp = new BatchDistributionResponse();
 		try {
+			requestUser.setReqUser(req.getReqUser());
 			resp = voucherClient.distributeVouchers(req);
 			resp.setStatus(BatchStatus.SUCCESS);
 		} catch(Exception ex) {
@@ -80,6 +84,7 @@ public class DistributionServiceImpl implements DistributionService {
 			});
 			bdReq.setCustomers(ids);
 			try {
+				requestUser.setReqUser(bdReq.getReqUser());
 				BatchDistributionResponse response = voucherClient.distributeVouchers(bdReq);
 				voucherCount += response.getVoucherCount();
 				customerCount += response.getCustomerCount();

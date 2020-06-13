@@ -1,7 +1,8 @@
-package io.chainmind.myriad.domain;
+package io.chainmind.myriadapi;
 
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
+import io.chainmind.myriadapi.domain.RequestUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

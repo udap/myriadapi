@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import io.chainmind.myriadapi.domain.RequestUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
@@ -45,6 +46,8 @@ public class RedemptionController {
 	private OrganizationService organizationService;
 	@Autowired
 	private RequestOrg requestOrg;
+	@Autowired
+	private RequestUser requestUser;
 
 	@PostMapping
 	public CreateRedemptionResponse create(@Valid @RequestBody RedeemVoucherRequest req) {
@@ -77,6 +80,7 @@ public class RedemptionController {
 			metadata.put("order", req.getOrder());
 			redeemReq.setMetadata(metadata);
 		}
+		requestUser.setReqUser(redeemReq.getReqUser());
 		return redemptionClient.createRedemption(redeemReq);
 	}
 	

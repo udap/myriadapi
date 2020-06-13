@@ -9,6 +9,7 @@ import java.util.Objects;
 
 import javax.validation.Valid;
 
+import io.chainmind.myriadapi.domain.RequestUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +66,8 @@ public class VoucherController {
 
 	@Autowired
 	private RequestOrg appOrg;
+	@Autowired
+	private RequestUser requestUser;
 	
 	@Autowired
 	private AccountService accountService;
@@ -170,6 +173,7 @@ public class VoucherController {
     @PutMapping("/{id}/transfer")
     public TransferVoucherResponse transfer(@PathVariable(name="id")String voucherId, 
     		@Valid @RequestBody TransferVoucherRequest req) {
+		requestUser.setReqUser(req.getReqUser());
     	return voucherClient.transferVoucher(voucherId, req);
     }
     
@@ -182,7 +186,7 @@ public class VoucherController {
     	Organization topAncestor = organizationService.findTopAncestor(reqOrg);
     	if (!Objects.equals(topAncestor, appOrg.getAppOrg()))
     		throw new ApiException(HttpStatus.FORBIDDEN, "batchTransfer.invalidParams");
-
+		requestUser.setReqUser(req.getReqUser());
     	return voucherClient.batchTransfer(req);
     }
     

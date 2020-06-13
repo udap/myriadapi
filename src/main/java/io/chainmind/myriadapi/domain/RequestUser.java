@@ -1,4 +1,4 @@
-package io.chainmind.myriad.domain;
+package io.chainmind.myriadapi.domain;
 
 import lombok.Data;
 
