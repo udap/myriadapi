@@ -65,7 +65,8 @@ feign:
       myriad:
         read-timeout: 5000
         request-interceptors:
-          - feign.RequestInterceptor
+          - org.springframework.cloud.security.oauth2.client.feign.OAuth2FeignRequestInterceptor
+          - io.chainmind.myriad.domain.MyriadHeaderRequestInterceptor
         logger-level: full
 logging:
   level:
