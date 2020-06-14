@@ -3,6 +3,7 @@
  */
 package io.chainmind.myriadapi.web;
 
+import io.chainmind.myriadapi.domain.RequestUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +29,12 @@ public class MvcConfigurer implements WebMvcConfigurer {
 	@RequestScope
 	public RequestOrg getRequestOrg() {
 		return new RequestOrg();
+	}
+
+	@Bean
+	@RequestScope
+	public RequestUser getCurrentUser() {
+		return new RequestUser();
 	}
 
 	@Override

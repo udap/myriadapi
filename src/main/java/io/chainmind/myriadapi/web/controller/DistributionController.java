@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import io.chainmind.myriadapi.domain.RequestUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
@@ -41,7 +42,9 @@ import io.chainmind.myriadapi.service.OrganizationService;
 public class DistributionController {
 	@Autowired
 	private VoucherClient voucherClient;
-	
+
+	@Autowired
+	private RequestUser requestUser;
 	@Autowired
 	private AccountService accountService;
 	@Autowired
@@ -85,7 +88,7 @@ public class DistributionController {
 		mReq.setReqUser(req.getReqUser());
 		mReq.setVoucherId(req.getVoucherId());
 		mReq.setCampaignId(req.getCampaignId());
-		
+		requestUser.setReqUser(mReq.getReqUser());
 		return voucherClient.distributeVoucher(mReq);
 	}
 	

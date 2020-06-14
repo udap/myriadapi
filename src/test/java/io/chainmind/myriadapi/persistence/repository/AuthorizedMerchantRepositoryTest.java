@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import io.chainmind.myriadapi.domain.entity.AuthorizedMerchant;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -21,7 +20,7 @@ public class AuthorizedMerchantRepositoryTest {
 	
     @Test
     public void findTopByUpCode(){
-    	Organization merchant = orgRepo.findTopByUpCode("777290058135881");
+    	Organization merchant = orgRepo.findByUpCode("777290058135881");
     	assertTrue(merchant != null);
     	log.debug("Current merchant is {}", merchant.getStatus());
     }
