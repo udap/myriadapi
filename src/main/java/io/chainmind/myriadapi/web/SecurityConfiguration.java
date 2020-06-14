@@ -48,7 +48,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 
         		AppRegistration registration = appRegistrationService.findWithOrgByAppId(principal);
         		if (registration == null){
-        			throw new BadCredentialsException("The API key was not found or not the expected value.");
+        			throw new BadCredentialsException("The App Id was not found or not the expected value.");
         		}
         		// set request scope bean value
         		requestOrg.setAppId(principal);

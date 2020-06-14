@@ -1,7 +1,5 @@
 package io.chainmind.myriadapi.client;
 
-import java.util.List;
-
 import javax.validation.Valid;
 
 import org.springframework.cloud.openfeign.FeignClient;
