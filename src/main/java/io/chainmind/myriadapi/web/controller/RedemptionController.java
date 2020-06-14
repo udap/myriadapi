@@ -5,7 +5,6 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
-import io.chainmind.myriadapi.domain.RequestUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
@@ -21,7 +20,7 @@ import io.chainmind.myriad.domain.dto.redemption.ConfirmRedemptionResponse;
 import io.chainmind.myriad.domain.dto.redemption.CreateRedemptionRequest;
 import io.chainmind.myriad.domain.dto.redemption.CreateRedemptionResponse;
 import io.chainmind.myriadapi.client.VoucherClient;
-import io.chainmind.myriadapi.domain.RequestOrg;
+import io.chainmind.myriadapi.domain.RequestUser;
 import io.chainmind.myriadapi.domain.dto.CompleteRedemptionRequest;
 import io.chainmind.myriadapi.domain.dto.RedeemVoucherRequest;
 import io.chainmind.myriadapi.domain.entity.Account;
@@ -45,7 +44,7 @@ public class RedemptionController {
 	@Autowired
 	private OrganizationService organizationService;
 	@Autowired
-	private RequestOrg requestOrg;
+	private RequestUser requestOrg;
 	@Autowired
 	private RequestUser requestUser;
 
@@ -80,7 +79,7 @@ public class RedemptionController {
 			metadata.put("order", req.getOrder());
 			redeemReq.setMetadata(metadata);
 		}
-		requestUser.setReqUser(redeemReq.getReqUser());
+		requestUser.setId(redeemReq.getReqUser());
 		return redemptionClient.createRedemption(redeemReq);
 	}
 	

@@ -9,7 +9,6 @@ import java.util.Objects;
 
 import javax.validation.Valid;
 
-import io.chainmind.myriadapi.domain.RequestUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +42,7 @@ import io.chainmind.myriad.domain.dto.voucher.config.DiscountResponse;
 import io.chainmind.myriad.domain.dto.voucher.config.SimpleVoucherConfig;
 import io.chainmind.myriadapi.client.VoucherClient;
 import io.chainmind.myriadapi.domain.CodeType;
-import io.chainmind.myriadapi.domain.RequestOrg;
+import io.chainmind.myriadapi.domain.RequestUser;
 import io.chainmind.myriadapi.domain.dto.OrgDTO;
 import io.chainmind.myriadapi.domain.dto.QualifyCouponRequest;
 import io.chainmind.myriadapi.domain.dto.VoucherDetailsResponse;
@@ -64,8 +63,6 @@ public class VoucherController {
 	@Autowired
 	private VoucherClient voucherClient;
 
-	@Autowired
-	private RequestOrg appOrg;
 	@Autowired
 	private RequestUser requestUser;
 	
@@ -173,7 +170,7 @@ public class VoucherController {
     @PutMapping("/{id}/transfer")
     public TransferVoucherResponse transfer(@PathVariable(name="id")String voucherId, 
     		@Valid @RequestBody TransferVoucherRequest req) {
-		requestUser.setReqUser(req.getReqUser());
+		requestUser.setId(req.getReqUser());
     	return voucherClient.transferVoucher(voucherId, req);
     }
     
@@ -184,9 +181,9 @@ public class VoucherController {
     	if (reqOrg==null)
     		throw new ApiException(HttpStatus.NOT_FOUND, "batchTransfer.invalidParams");
     	Organization topAncestor = organizationService.findTopAncestor(reqOrg);
-    	if (!Objects.equals(topAncestor, appOrg.getAppOrg()))
+    	if (!Objects.equals(topAncestor, requestUser.getAppOrg()))
     		throw new ApiException(HttpStatus.FORBIDDEN, "batchTransfer.invalidParams");
-		requestUser.setReqUser(req.getReqUser());
+		requestUser.setId(req.getReqUser());
     	return voucherClient.batchTransfer(req);
     }
     

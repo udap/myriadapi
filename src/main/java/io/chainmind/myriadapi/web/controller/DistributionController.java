@@ -7,7 +7,6 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
-import io.chainmind.myriadapi.domain.RequestUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
@@ -21,6 +20,7 @@ import io.chainmind.myriad.domain.dto.distribution.DistributeVoucherRequest;
 import io.chainmind.myriad.domain.dto.distribution.DistributeVoucherResponse;
 import io.chainmind.myriadapi.client.VoucherClient;
 import io.chainmind.myriadapi.domain.CodeType;
+import io.chainmind.myriadapi.domain.RequestUser;
 import io.chainmind.myriadapi.domain.dto.BatchStatus;
 import io.chainmind.myriadapi.domain.dto.DistributeToCustomersRequest;
 import io.chainmind.myriadapi.domain.dto.DistributeToSingleCustomerRequest;
@@ -88,7 +88,7 @@ public class DistributionController {
 		mReq.setReqUser(req.getReqUser());
 		mReq.setVoucherId(req.getVoucherId());
 		mReq.setCampaignId(req.getCampaignId());
-		requestUser.setReqUser(mReq.getReqUser());
+		requestUser.setId(mReq.getReqUser());
 		return voucherClient.distributeVoucher(mReq);
 	}
 	

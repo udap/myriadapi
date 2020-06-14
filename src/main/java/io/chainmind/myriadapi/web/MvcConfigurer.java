@@ -3,7 +3,6 @@
  */
 package io.chainmind.myriadapi.web;
 
-import io.chainmind.myriadapi.domain.RequestUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +10,7 @@ import org.springframework.web.context.annotation.RequestScope;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import io.chainmind.myriadapi.domain.RequestOrg;
+import io.chainmind.myriadapi.domain.RequestUser;
 
 /**
  * @author matrix
@@ -27,15 +26,15 @@ public class MvcConfigurer implements WebMvcConfigurer {
 	 */
 	@Bean
 	@RequestScope
-	public RequestOrg getRequestOrg() {
-		return new RequestOrg();
-	}
-
-	@Bean
-	@RequestScope
-	public RequestUser getCurrentUser() {
+	public RequestUser requestOrg() {
 		return new RequestUser();
 	}
+
+//	@Bean
+//	@RequestScope
+//	public RequestUser getCurrentUser() {
+//		return new RequestUser();
+//	}
 
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {

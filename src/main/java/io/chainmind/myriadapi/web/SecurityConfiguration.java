@@ -14,7 +14,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 
-import io.chainmind.myriadapi.domain.RequestOrg;
+import io.chainmind.myriadapi.domain.RequestUser;
 import io.chainmind.myriadapi.domain.entity.AppRegistration;
 import io.chainmind.myriadapi.service.AppRegistrationService;
 
@@ -29,7 +29,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	private AppRegistrationService appRegistrationService;
 	
 	@Autowired
-	private RequestOrg requestOrg;
+	private RequestUser requestOrg;
 	
 	@Override
 	public void configure(WebSecurity web) throws Exception {
@@ -53,6 +53,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         		// set request scope bean value
         		requestOrg.setAppId(principal);
         		requestOrg.setAppOrg(registration.getOrg());
+        		// by default use current principal as the request user id
+        		requestOrg.setId(principal);
         		
                 authentication.setAuthenticated(true);
                 return authentication;

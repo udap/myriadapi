@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import io.chainmind.myriadapi.CacheConfiguration;
 import io.chainmind.myriadapi.domain.CodeType;
-import io.chainmind.myriadapi.domain.RequestOrg;
+import io.chainmind.myriadapi.domain.RequestUser;
 import io.chainmind.myriadapi.domain.entity.Account;
 import io.chainmind.myriadapi.domain.exception.ApiException;
 import io.chainmind.myriadapi.persistence.repository.AccountRepository;
@@ -23,7 +23,7 @@ public class AccountServiceImpl implements AccountService {
 	@Autowired
 	private AccountRepository accountRepo;
 	@Autowired
-	private RequestOrg requestOrg;
+	private RequestUser requestOrg;
 	
 	@Cacheable(value = CacheConfiguration.ACCOUNT_BY_CODE_CACHE, unless="#result == null")
 	@Override

@@ -3,7 +3,6 @@ package io.chainmind.myriadapi.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.chainmind.myriadapi.domain.RequestUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,6 +12,7 @@ import org.springframework.util.StringUtils;
 import io.chainmind.myriad.domain.dto.distribution.BatchDistributionRequest;
 import io.chainmind.myriad.domain.dto.distribution.BatchDistributionResponse;
 import io.chainmind.myriadapi.client.VoucherClient;
+import io.chainmind.myriadapi.domain.RequestUser;
 import io.chainmind.myriadapi.domain.dto.BatchStatus;
 import io.chainmind.myriadapi.domain.entity.Customer;
 import io.chainmind.myriadapi.event.BatchDistributionEvent;
@@ -49,7 +49,7 @@ public class DistributionServiceImpl implements DistributionService {
 
 		BatchDistributionResponse resp = new BatchDistributionResponse();
 		try {
-			requestUser.setReqUser(req.getReqUser());
+			requestUser.setId(req.getReqUser());
 			resp = voucherClient.distributeVouchers(req);
 			resp.setStatus(BatchStatus.SUCCESS);
 		} catch(Exception ex) {
@@ -84,7 +84,7 @@ public class DistributionServiceImpl implements DistributionService {
 			});
 			bdReq.setCustomers(ids);
 			try {
-				requestUser.setReqUser(bdReq.getReqUser());
+				requestUser.setId(bdReq.getReqUser());
 				BatchDistributionResponse response = voucherClient.distributeVouchers(bdReq);
 				voucherCount += response.getVoucherCount();
 				customerCount += response.getCustomerCount();

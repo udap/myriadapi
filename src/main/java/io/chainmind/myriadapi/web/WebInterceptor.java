@@ -12,7 +12,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
-import io.chainmind.myriadapi.domain.RequestOrg;
+import io.chainmind.myriadapi.domain.RequestUser;
 import io.chainmind.myriadapi.domain.entity.AppRegistration;
 import io.chainmind.myriadapi.domain.exception.ApiException;
 import io.chainmind.myriadapi.service.AppRegistrationService;
@@ -21,7 +21,7 @@ import io.chainmind.myriadapi.service.AppRegistrationService;
 public class WebInterceptor implements HandlerInterceptor {
 	private static final Logger LOG = LoggerFactory.getLogger(WebInterceptor.class);
 	@Autowired
-	private RequestOrg requestOrg;
+	private RequestUser requestOrg;
 	@Autowired
 	private AppRegistrationService appRegistrationService;
 
