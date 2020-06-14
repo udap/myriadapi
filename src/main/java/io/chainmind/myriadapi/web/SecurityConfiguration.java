@@ -54,7 +54,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         		requestOrg.setAppId(principal);
         		requestOrg.setAppOrg(registration.getOrg());
         		// by default use current principal as the request user id
-        		requestOrg.setId(principal);
+//        		requestOrg.setId(principal);
         		
                 authentication.setAuthenticated(true);
                 return authentication;
