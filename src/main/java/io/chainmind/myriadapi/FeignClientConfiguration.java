@@ -1,5 +1,6 @@
 package io.chainmind.myriadapi;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.security.oauth2.client.feign.OAuth2FeignRequestInterceptor;
 import org.springframework.context.annotation.Bean;
@@ -10,6 +11,9 @@ import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResour
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.common.AuthenticationScheme;
 
+import feign.RequestInterceptor;
+import io.chainmind.myriadapi.domain.RequestUser;
+
 @Configuration
 public class FeignClientConfiguration {
 	@Value("${myriad.oidc.token-url}") 
@@ -18,11 +22,22 @@ public class FeignClientConfiguration {
 	private String clientId;
 	@Value("${myriad.oidc.client-secret}")
 	private String clientSecret;
+	
+	@Autowired
+	private RequestUser requestUser;
 
     @Bean
     public OAuth2FeignRequestInterceptor requestInterceptor() {
         return new OAuth2FeignRequestInterceptor(new DefaultOAuth2ClientContext(), resource());
     }
+    
+    @Bean
+    public RequestInterceptor commonHeadersRequestInterceptor() {
+        return template -> {
+            template.header("x-request-user", requestUser.getId());
+        };
+    }
+    
     @Bean
     public OAuth2RestTemplate oAuth2RestTemplate() {
         OAuth2RestTemplate oAuth2RestTemplate = new OAuth2RestTemplate(resource());
