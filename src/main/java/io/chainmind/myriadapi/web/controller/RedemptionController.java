@@ -72,23 +72,23 @@ public class RedemptionController {
 		// the merchant may not be in the authorized merchant list but its ancestor could be
 		AuthorizedMerchant amAncestor = merchantService.find(marketer, topAncestor);
 
+		// either current merchant or its ancestor merchant must be anthorized for redemption
 		if (Objects.isNull(am) && Objects.isNull(amAncestor))
 			throw new ApiException(HttpStatus.FORBIDDEN, "merchant.notAuthorized");
 		
+		// ignore ancestor merchant if it is not authorized
 		Merchant mAncestor = null;
-		if (topAncestor.getId() != merchant.getId()) {
+		if (Objects.nonNull(amAncestor) && !Objects.equals(topAncestor.getId(),merchant.getId())) {
 			mAncestor = Merchant.builder()
 					.id(topAncestor.getId().toString())
-					.tags(amAncestor.getTags())
 					.build();			
 		}
-		
 		redeemReq.setMerchant(Merchant.builder()
 				.id(merchant.getId().toString())
 				.province(merchant.getProvince())
 				.city(merchant.getCity())
 				.district(merchant.getDistrict())
-				.tags(Objects.nonNull(am)?am.getTags():null)
+				.tags(Objects.nonNull(am)?am.getTags():amAncestor.getTags())
 				.topAncestor(mAncestor)
 				.build());
 		if (req.getOrder() != null) {
