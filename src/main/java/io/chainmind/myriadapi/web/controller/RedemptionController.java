@@ -2,6 +2,7 @@ package io.chainmind.myriadapi.web.controller;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.validation.Valid;
 
@@ -64,15 +65,31 @@ public class RedemptionController {
 		Organization marketer = requestOrg.getAppOrg();
 		if (StringUtils.hasText(req.getIssuerId()))
 			marketer = organizationService.findById(Long.valueOf(req.getIssuerId()));
+		// find current merchant's top ancestor - we need this to support merchant chain
+		Organization topAncestor = organizationService.findTopAncestor(merchant);
 		AuthorizedMerchant am = merchantService.find(marketer, merchant);
-		if (am == null)
+		
+		// the merchant may not be in the authorized merchant list but its ancestor could be
+		AuthorizedMerchant amAncestor = merchantService.find(marketer, topAncestor);
+
+		if (Objects.isNull(am) && Objects.isNull(amAncestor))
 			throw new ApiException(HttpStatus.FORBIDDEN, "merchant.notAuthorized");
+		
+		Merchant mAncestor = null;
+		if (topAncestor.getId() != merchant.getId()) {
+			mAncestor = Merchant.builder()
+					.id(topAncestor.getId().toString())
+					.tags(amAncestor.getTags())
+					.build();			
+		}
+		
 		redeemReq.setMerchant(Merchant.builder()
 				.id(merchant.getId().toString())
 				.province(merchant.getProvince())
 				.city(merchant.getCity())
 				.district(merchant.getDistrict())
-				.tags(am.getTags())
+				.tags(Objects.nonNull(am)?am.getTags():null)
+				.topAncestor(mAncestor)
 				.build());
 		if (req.getOrder() != null) {
 			Map<String, Object> metadata = new HashMap<>();
