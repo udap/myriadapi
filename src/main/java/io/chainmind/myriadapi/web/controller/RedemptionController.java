@@ -2,7 +2,7 @@ package io.chainmind.myriadapi.web.controller;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -31,6 +31,7 @@ import io.chainmind.myriadapi.domain.exception.ApiException;
 import io.chainmind.myriadapi.service.AccountService;
 import io.chainmind.myriadapi.service.AuthorizedMerchantService;
 import io.chainmind.myriadapi.service.OrganizationService;
+import io.chainmind.myriadapi.service.ValidationUtils;
 
 @RestController
 @RequestMapping("/api/redemptions")
@@ -71,26 +72,14 @@ public class RedemptionController {
 		
 		// the merchant may not be in the authorized merchant list but its ancestor could be
 		AuthorizedMerchant amAncestor = merchantService.find(marketer, topAncestor);
-
-		// either current merchant or its ancestor merchant must be anthorized for redemption
-		if (Objects.isNull(am) && Objects.isNull(amAncestor))
+		
+		Optional<Merchant> m = ValidationUtils.prepareMerchantFacts(merchant, topAncestor, am, amAncestor);
+		if (!m.isPresent())
 			throw new ApiException(HttpStatus.FORBIDDEN, "merchant.notAuthorized");
 		
-		// ignore ancestor merchant if it is not authorized
-		Merchant mAncestor = null;
-		if (Objects.nonNull(amAncestor) && !Objects.equals(topAncestor.getId(),merchant.getId())) {
-			mAncestor = Merchant.builder()
-					.id(topAncestor.getId().toString())
-					.build();			
-		}
-		redeemReq.setMerchant(Merchant.builder()
-				.id(merchant.getId().toString())
-				.province(merchant.getProvince())
-				.city(merchant.getCity())
-				.district(merchant.getDistrict())
-				.tags(Objects.nonNull(am)?am.getTags():amAncestor.getTags())
-				.topAncestor(mAncestor)
-				.build());
+		// set merchant
+		redeemReq.setMerchant(m.get());
+		// set order
 		if (req.getOrder() != null) {
 			Map<String, Object> metadata = new HashMap<>();
 			metadata.put("order", req.getOrder());

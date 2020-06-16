@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -53,6 +54,7 @@ import io.chainmind.myriadapi.domain.exception.ApiException;
 import io.chainmind.myriadapi.service.AccountService;
 import io.chainmind.myriadapi.service.AuthorizedMerchantService;
 import io.chainmind.myriadapi.service.OrganizationService;
+import io.chainmind.myriadapi.service.ValidationUtils;
 import io.chainmind.myriadapi.utils.CommonUtils;
 
 @RestController
@@ -214,27 +216,12 @@ public class VoucherController {
 				Organization marketer = organizationService.findById(Long.valueOf(v.getIssuer()));
 	    		AuthorizedMerchant am = merchantService.find(marketer, merchant);
 	    		AuthorizedMerchant amAncestor = (isTopAncestor)?am:merchantService.find(marketer, topAncestor);
-	    		// neither merchant nor its top ancestor is not authorized 
-	    		if (am == null && amAncestor == null)
-	    			continue;
-	    		Merchant mAncestor = isTopAncestor? null: Merchant.builder()
-	    				.id(topAncestor.getId().toString())
-	    				.province(topAncestor.getProvince())
-	    				.city(topAncestor.getCity())
-	    				.district(topAncestor.getDistrict())
-	    				.tags(amAncestor.getTags())
-	    				.build();
-	    		Merchant m = Merchant.builder()
-	    				.id(merchant.getId().toString())
-	    				.province(merchant.getProvince())
-	    				.city(merchant.getCity())
-	    				.district(merchant.getDistrict())
-	    				.tags((am!=null)?am.getTags():null)
-	    				.topAncestor(mAncestor)
-	    				.build();
-	    		QualifyResult result = voucherClient.qualify(v.getId(), QualifyRequest.builder()
+	    		Optional<Merchant> m = ValidationUtils.prepareMerchantFacts(merchant, topAncestor, am, amAncestor);
+	    		if (!m.isPresent()) continue;
+	    		QualifyResult result = voucherClient.qualify(v.getId(), 
+    				QualifyRequest.builder()
 	    				.customerId(account.getId().toString())
-	    				.merchant(m)
+	    				.merchant(m.get())
 	    				.order(req.getOrder())
 	    				.voucherId(v.getId())
 	    				.build());
