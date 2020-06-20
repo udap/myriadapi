@@ -14,6 +14,7 @@ public class DistributionListItem {
 	private String id;
 	private SimpleVoucherItem voucher;
 	private NamedCampaign campaign;
+	private String fromOwner;
 	// customer whom the voucher is distributed to
 	private String customerId;
 	// which channel is used to distribute the voucher

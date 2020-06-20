@@ -13,6 +13,7 @@ import java.util.Map;
 public class DistributionResponse extends CreateEntityResponse {
 	
 	private VoucherSummary voucher;
+	private String fromOwner;
 	// the account that receives the voucher
 	private String customerId;
 	private String orgId;
