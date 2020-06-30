@@ -153,7 +153,8 @@ public class VoucherController {
     	VoucherDetailsResponse response = new VoucherDetailsResponse();
     	response.setAuthorizationCode(voucher.getAuthorizationCode());
     	response.setCampaign(voucher.getCampaign());
-    	response.setCategory(voucher.getCode());
+		response.setCode(voucher.getCode());
+    	response.setCategory(voucher.getCategory());
     	response.setConfig(voucher.getConfig());
     	response.setEffective(voucher.getEffective());
     	response.setExpiry(voucher.getExpiry());
