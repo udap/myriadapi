@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.chainmind.myriad.domain.common.Audience;
+import io.chainmind.myriad.domain.common.Audience.Following;
 import io.chainmind.myriad.domain.dto.distribution.BatchDistributionResponse;
 import io.chainmind.myriad.domain.dto.distribution.DistributeVoucherRequest;
 import io.chainmind.myriad.domain.dto.distribution.DistributeVoucherResponse;
@@ -97,7 +99,7 @@ public class DistributionController {
 		// prepare BatchDistributionResponse
 		BatchDistributionResponse resp = new BatchDistributionResponse();
 
-		Map<Long, String> idMap = new HashMap<Long,String>();
+		Map<Long, Audience> audienceMap = new HashMap<Long,Audience>();
 		try {
 			// ensure a valid code type for customer
 			if (CodeType.CELLPHONE.equals(req.getAccountCodeType()) ||
@@ -119,7 +121,7 @@ public class DistributionController {
 					throw new ApiException(HttpStatus.NOT_FOUND, "employee.notFound");
 					
 				int customerCount = 0;
-				List<String> ids = new ArrayList<String>();
+				List<Audience> audiences = new ArrayList<>();
 				if (req.isAll()) {
 					// query total number of active customers
 					customerCount = employeeService.countByOrganizationAndAccount(org, mgrAccount);
@@ -127,27 +129,31 @@ public class DistributionController {
 					// validate codes in the request
 					for (String code: req.getAccounts()) {
 						Account account = accountService.findByCode(code, req.getAccountCodeType());
+						Customer customer = null;
 						if (account != null) {
 							if (req.getStrictMode().equals(DistributionMode.REQUSER_ONLY)) {
 								// is the account a customer of the reqUser?
-								Customer customer = customerService.findByAccountAndManager(account, mgrEmployee);
-								if (customer == null) 
-									throw new ApiException(HttpStatus.NOT_FOUND, "customer.notFound");
-									
+								customer = customerService.findByAccountAndManager(account, mgrEmployee);
 								
 							} else if (req.getStrictMode().equals(DistributionMode.REQORG_ONLY)) {
 								// is the account a customer of the reqOrg?
-								Customer customer = customerService.findByAccountAndOrganization(account, org);
-								if (customer == null)
-									throw new ApiException(HttpStatus.NOT_FOUND, "customer.notFound");
-								
+								customer = customerService.findByAccountAndOrganization(account, org);								
 							}
-							idMap.putIfAbsent(account.getId(), (account.getId().toString()));
+							if (customer == null)
+								throw new ApiException(HttpStatus.NOT_FOUND, "customer.notFound");
+							Audience audience = Audience.builder()
+									.id(account.getId().toString())
+									.build();
+							audience.addFollowing(Following.builder()
+									.org(customer.getOrg().getId().toString())
+									.tags(customer.getTags())
+									.build());
+							audienceMap.putIfAbsent(account.getId(), audience);
 						}
 					}
 					// replace with clean data
-					ids.addAll(idMap.values());
-					customerCount = ids.size();
+					audiences.addAll(audienceMap.values());
+					customerCount = audiences.size();
 				}
 				// 
 				resp.setCustomerCount(customerCount);
@@ -161,7 +167,7 @@ public class DistributionController {
 							.channel(req.getChannel())
 							.metadata(req.getMetadata())
 							.requestEmployee(mgrEmployee)
-							.idList(ids)
+							.audiences(audiences)
 							.build();			
 					// create batch distribution event and publish
 					eventPublisher.activateBatchDistribution(event);

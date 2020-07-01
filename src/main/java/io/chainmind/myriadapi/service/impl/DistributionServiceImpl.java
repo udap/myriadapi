@@ -9,6 +9,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import io.chainmind.myriad.domain.common.Audience;
+import io.chainmind.myriad.domain.common.Audience.Following;
 import io.chainmind.myriad.domain.dto.distribution.BatchDistributionRequest;
 import io.chainmind.myriad.domain.dto.distribution.BatchDistributionResponse;
 import io.chainmind.myriadapi.client.VoucherClient;
@@ -45,7 +47,7 @@ public class DistributionServiceImpl implements DistributionService {
 		req.setMetadata(req.getMetadata());
 		req.setReqOrg(event.getRequestEmployee().getOrg().getId().toString());
 		req.setReqUser(event.getRequestEmployee().getAccount().getId().toString());
-		req.setCustomers(event.getIdList());
+		req.setCustomers(event.getAudiences());
 
 		BatchDistributionResponse resp = new BatchDistributionResponse();
 		try {
@@ -53,7 +55,7 @@ public class DistributionServiceImpl implements DistributionService {
 			resp = voucherClient.distributeVouchers(req);
 			resp.setStatus(BatchStatus.SUCCESS);
 		} catch(Exception ex) {
-			resp.setCustomerCount(event.getIdList().size());
+			resp.setCustomerCount(event.getAudiences().size());
 			resp.setStatus(BatchStatus.FAILED);
 			resp.setMsg(ex.getMessage());
 		}
@@ -78,11 +80,17 @@ public class DistributionServiceImpl implements DistributionService {
 			bdReq.setMetadata(event.getMetadata());
 			bdReq.setReqOrg(event.getRequestEmployee().getOrg().getId().toString());
 			bdReq.setReqUser(event.getRequestEmployee().getAccount().getId().toString());
-			List<String> ids = new ArrayList<String>();
+			List<Audience> customers = new ArrayList<>();
 			custPage.forEach(c->{
-				ids.add(c.getAccount().getId().toString());
+				// TODO: set following
+				customers.add(Audience.builder()
+						.id(c.getAccount().getId().toString())
+						.build().addFollowing(Following.builder()
+								.org(c.getOrg().getId().toString())
+								.tags(c.getTags())
+								.build()));
 			});
-			bdReq.setCustomers(ids);
+			bdReq.setCustomers(customers);
 			try {
 				requestUser.setId(bdReq.getReqUser());
 				BatchDistributionResponse response = voucherClient.distributeVouchers(bdReq);

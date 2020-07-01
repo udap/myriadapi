@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import io.chainmind.myriad.domain.common.Audience;
 import io.chainmind.myriad.domain.common.Channel;
 import io.chainmind.myriadapi.domain.entity.Employee;
 import lombok.Builder;
@@ -31,7 +32,7 @@ public class BatchDistributionEvent {
 	// extra data
 	private Map<String, Object> metadata;
 	
-	private List<String> idList;
+	private List<Audience> audiences;
 
 	
 }

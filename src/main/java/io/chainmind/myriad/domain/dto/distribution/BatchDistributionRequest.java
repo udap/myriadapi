@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 
+import io.chainmind.myriad.domain.common.Audience;
 import io.chainmind.myriad.domain.common.Channel;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,6 +29,6 @@ public class BatchDistributionRequest {
 	private Map<String, Object> metadata;
 	
 	@NotEmpty
-	private List<String> customers = new ArrayList<String>();
+	private List<Audience> customers = new ArrayList<>();
 
 }
