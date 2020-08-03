@@ -2,13 +2,13 @@ package io.chainmind.myriadapi.web.controller;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +20,7 @@ import io.chainmind.myriad.domain.dto.redemption.ConfirmRedemptionRequest;
 import io.chainmind.myriad.domain.dto.redemption.ConfirmRedemptionResponse;
 import io.chainmind.myriad.domain.dto.redemption.CreateRedemptionRequest;
 import io.chainmind.myriad.domain.dto.redemption.CreateRedemptionResponse;
+import io.chainmind.myriad.domain.dto.voucher.VoucherResponse;
 import io.chainmind.myriadapi.client.VoucherClient;
 import io.chainmind.myriadapi.domain.RequestUser;
 import io.chainmind.myriadapi.domain.dto.CompleteRedemptionRequest;
@@ -45,8 +46,8 @@ public class RedemptionController {
 	private AuthorizedMerchantService merchantService;
 	@Autowired
 	private OrganizationService organizationService;
-	@Autowired
-	private RequestUser requestOrg;
+//	@Autowired
+//	private RequestUser requestOrg;
 	@Autowired
 	private RequestUser requestUser;
 
@@ -58,17 +59,24 @@ public class RedemptionController {
 		// query account
 		Account account = accountService.findByCode(req.getReqUserId(), req.getIdType());
 		if (account == null)
-			throw new ApiException(HttpStatus.NOT_FOUND, "request user not found");
+			throw new ApiException(HttpStatus.NOT_FOUND, "user.notFound");
 		redeemReq.setCustomerId(account.getId().toString());
 		redeemReq.setReqUser(redeemReq.getCustomerId());
 		// query merchant
 		Organization merchant = organizationService.findByCode(req.getMerchantCode(), req.getCodeType());
-		Organization marketer = requestOrg.getAppOrg();
-		if (StringUtils.hasText(req.getIssuerId()))
-			marketer = organizationService.findById(Long.valueOf(req.getIssuerId()));
+		
+		// marketer is the issuer of the voucher
+		VoucherResponse voucher = redemptionClient.findVoucherById(req.getVoucherId());
+		if (Objects.isNull(voucher))
+			throw new ApiException(HttpStatus.NOT_FOUND,"voucher.notFound");
+		
+		// find the marketer
+		Organization marketer = organizationService.findById(Long.valueOf(voucher.getIssuer()));
+		// validate the authorized merchant
+		AuthorizedMerchant am = merchantService.find(marketer, merchant);
+		
 		// find current merchant's top ancestor - we need this to support merchant chain
 		Organization topAncestor = organizationService.findTopAncestor(merchant);
-		AuthorizedMerchant am = merchantService.find(marketer, merchant);
 		
 		// the merchant may not be in the authorized merchant list but its ancestor could be
 		AuthorizedMerchant amAncestor = merchantService.find(marketer, topAncestor);
