@@ -21,7 +21,7 @@ public class ValidationUtils {
 		// ensure merchant and its ancestor cannot be null
 		assert(merchant != null && ancestor != null);
 		// neither merchant nor its top ancestor is authorized 
-		if (Objects.isNull(am) && Objects.isNull(ancestor))
+		if (Objects.isNull(am) && Objects.isNull(amAncestor))
 			return Optional.empty();
 
 		Merchant mAncestor = null;

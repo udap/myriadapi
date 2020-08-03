@@ -18,9 +18,9 @@ public class RedeemVoucherRequest {
 	private String merchantCode;
 	@NotBlank
 	private String orderId;
-
+	// the issuer of the voucher to be redeemed
 	private String issuerId;
-	
+	// the order that the voucher is redeemed against
 	private Order order;
 	
 	private CodeType idType = CodeType.ID;

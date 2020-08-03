@@ -2,13 +2,13 @@ package io.chainmind.myriadapi.web.controller;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -65,13 +65,16 @@ public class RedemptionController {
 		// query merchant
 		Organization merchant = organizationService.findByCode(req.getMerchantCode(), req.getCodeType());
 		
-		// marketer is the issuer of the voucher
-		VoucherResponse voucher = redemptionClient.findVoucherById(req.getVoucherId());
-		if (Objects.isNull(voucher))
-			throw new ApiException(HttpStatus.NOT_FOUND,"voucher.notFound");
-		
+		String issuerId = req.getIssuerId();
+		if (!StringUtils.hasText(issuerId)) {
+			VoucherResponse voucher = redemptionClient.findVoucherById(req.getVoucherId());
+			issuerId = voucher.getIssuer();
+		}
 		// find the marketer
-		Organization marketer = organizationService.findById(Long.valueOf(voucher.getIssuer()));
+		Organization marketer = organizationService.findById(Long.valueOf(issuerId));
+		if (marketer == null)
+			throw new ApiException(HttpStatus.NOT_FOUND, "issuer.notFound");
+		
 		// validate the authorized merchant
 		AuthorizedMerchant am = merchantService.find(marketer, merchant);
 		
