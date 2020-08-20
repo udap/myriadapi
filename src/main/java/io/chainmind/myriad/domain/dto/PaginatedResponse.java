@@ -13,6 +13,7 @@ public class PaginatedResponse<T> {
     private int total;
     private int page;
     private int size;
+    private long totalElements;
     private List<T> entries = new ArrayList<>();
 
 }

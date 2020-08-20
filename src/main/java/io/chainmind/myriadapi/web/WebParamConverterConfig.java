@@ -6,10 +6,16 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.UUID;
 
+import org.springframework.cloud.openfeign.FeignFormatterRegistrar;
+import org.springframework.cloud.openfeign.support.PageJacksonModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.format.FormatterRegistry;
+
+import com.fasterxml.jackson.databind.Module;
 
 @Configuration
 public class WebParamConverterConfig {
@@ -75,8 +81,48 @@ public class WebParamConverterConfig {
             }
         };
     }
+    
+    @Bean
+    public Converter<String, UUID> uuidConverter() {
+        return new Converter<String, UUID>() {
+            @Override
+            public UUID convert(String source) {
+                return UUID.fromString(source);
+            }
+        };
+    }
 
+    /**
+     * feign 的page分页序列化支持
+     * @return
+     */
+    @Bean
+    public Module pageJacksonModule() { 
+    	return new PageJacksonModule(); 
+	}
 
+    /**
+     * feign 的自动转换器
+     */
+    @Bean
+    public FeignFormatterRegistrar localDateFeignFormatterRegistrar() {
+        return (FormatterRegistry formatterRegistry) -> {
+            //LocalDate转换成String
+            formatterRegistry.addConverter(LocalDate.class, String.class,localDateToStringConverter());
+        };
+    }
 
+    @Bean
+    public Converter<LocalDate,String> localDateToStringConverter() {
+        return new Converter<LocalDate, String>() {
+            @Override
+            public String convert(LocalDate source) {
+                if (source == null) {
+                    return null;
+                }
+                return source.format(DateTimeFormatter.ofPattern(WebParamConverterConfig.DEFAULT_DATE_FORMAT));
+            }
+        };
+    }
 
 }

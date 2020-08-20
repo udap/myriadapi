@@ -73,23 +73,24 @@ public class CampaignController {
     	if (!StringUtils.hasText(participantId) && !StringUtils.hasText(partyId))
     		throw new ApiException(HttpStatus.BAD_REQUEST, "campaign.missingParams");
     	
-    	Page<CampaignListItem> campaignsPage = voucherClient.listCampaigns(pageRequest, partyId, partyType, 
+    	Page<CampaignListItem> aPage = voucherClient.listCampaigns(pageRequest, partyId, partyType, 
     			participantId, participantType, status, searchTxt);
-    	
-    	for(CampaignListItem c : campaignsPage.getContent()) {
+    
+    	// convert to PaginatedResponse
+    	PaginatedResponse<CampaignListItem> result = new PaginatedResponse<CampaignListItem>();
+    	result.setPage(aPage.getNumber());
+    	result.setSize(aPage.getSize());
+    	result.setTotal(aPage.getTotalPages());
+    	result.setTotalElements(aPage.getTotalElements());
+    	for(CampaignListItem c : aPage.getContent()) {
     		Account account = accountService.findById(c.getCreatedBy());
     		if (account != null)
     			c.setCreatedBy(account.getName());
     		Organization org = orgService.findById(Long.valueOf(c.getOwner()));
     		if (org != null)
     			c.setOwner(org.getName());
+    		result.getEntries().add(c);
     	} 
-    	
-    	PaginatedResponse<CampaignListItem> result = new PaginatedResponse<CampaignListItem>();
-    	result.setTotal(campaignsPage.getTotalPages());
-    	result.setPage(campaignsPage.getNumber());
-    	result.setSize(campaignsPage.getSize());
-    	result.setEntries(campaignsPage.getContent());
     	
     	return result;
     }

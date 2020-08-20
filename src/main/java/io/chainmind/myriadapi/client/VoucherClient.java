@@ -42,9 +42,9 @@ import io.chainmind.myriadapi.web.FeignClientConfiguration;
 @FeignClient(name = "voucher-service",configuration=FeignClientConfiguration.class)
 public interface VoucherClient {
 	
-    @GetMapping(value="/campaigns")
+    @GetMapping(value = "/campaigns")
     public Page<CampaignListItem> listCampaigns(
-            @PageableDefault(size = 20, direction = Sort.Direction.DESC) Pageable pageable,
+            @PageableDefault(size = 20, sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) String partyId, // party id
             @RequestParam(required = false, defaultValue="HOST")PartyType partyType,            
             @RequestParam(required = false) String participantId, // the account that participated in the campaign
