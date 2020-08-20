@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CampaignListItemResponse extends IdResponse {
+public class CampaignListItem extends IdResponse {
 	private String owner;
 	private String name;
 	private String description;

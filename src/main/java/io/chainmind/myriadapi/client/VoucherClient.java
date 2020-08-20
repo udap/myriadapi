@@ -19,7 +19,7 @@ import io.chainmind.myriad.domain.common.ParticipantType;
 import io.chainmind.myriad.domain.common.PartyType;
 import io.chainmind.myriad.domain.common.VoucherType;
 import io.chainmind.myriad.domain.dto.PaginatedResponse;
-import io.chainmind.myriad.domain.dto.campaign.CampaignListItemResponse;
+import io.chainmind.myriad.domain.dto.campaign.CampaignListItem;
 import io.chainmind.myriad.domain.dto.distribution.BatchDistributionRequest;
 import io.chainmind.myriad.domain.dto.distribution.BatchDistributionResponse;
 import io.chainmind.myriad.domain.dto.distribution.DistributeVoucherRequest;
@@ -43,7 +43,7 @@ import io.chainmind.myriadapi.web.FeignClientConfiguration;
 public interface VoucherClient {
 	
     @GetMapping(value="/campaigns")
-    public Page<CampaignListItemResponse> listCampaigns(
+    public Page<CampaignListItem> listCampaigns(
             @PageableDefault(size = 20, direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) String partyId, // party id
             @RequestParam(required = false, defaultValue="HOST")PartyType partyType,            
