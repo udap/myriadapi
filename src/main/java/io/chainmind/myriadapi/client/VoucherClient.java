@@ -22,6 +22,7 @@ import io.chainmind.myriad.domain.dto.PaginatedResponse;
 import io.chainmind.myriad.domain.dto.campaign.CampaignListItem;
 import io.chainmind.myriad.domain.dto.distribution.BatchDistributionRequest;
 import io.chainmind.myriad.domain.dto.distribution.BatchDistributionResponse;
+import io.chainmind.myriad.domain.dto.distribution.CollectVoucherRequest;
 import io.chainmind.myriad.domain.dto.distribution.DistributeVoucherRequest;
 import io.chainmind.myriad.domain.dto.distribution.DistributeVoucherResponse;
 import io.chainmind.myriad.domain.dto.redemption.ConfirmRedemptionRequest;
@@ -83,6 +84,9 @@ public interface VoucherClient {
 	
 	@PostMapping("/distributions/batch")
 	BatchDistributionResponse distributeVouchers(@Valid @RequestBody BatchDistributionRequest req);
+	
+	@PostMapping("/distributions/collect")
+	public DistributeVoucherResponse create(@Valid @RequestBody CollectVoucherRequest req);
     
     @PostMapping(value="/redemptions")
 	CreateRedemptionResponse createRedemption(@Valid @RequestBody CreateRedemptionRequest req);

@@ -25,11 +25,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.chainmind.myriad.domain.common.Audience;
 import io.chainmind.myriad.domain.common.DiscountType;
 import io.chainmind.myriad.domain.common.Merchant;
 import io.chainmind.myriad.domain.common.Order;
 import io.chainmind.myriad.domain.common.VoucherType;
 import io.chainmind.myriad.domain.dto.PaginatedResponse;
+import io.chainmind.myriad.domain.dto.distribution.CollectVoucherRequest;
+import io.chainmind.myriad.domain.dto.distribution.DistributeVoucherResponse;
 import io.chainmind.myriad.domain.dto.voucher.BatchTransferRequest;
 import io.chainmind.myriad.domain.dto.voucher.BatchTransferResponse;
 import io.chainmind.myriad.domain.dto.voucher.QualifyRequest;
@@ -56,12 +59,12 @@ import io.chainmind.myriadapi.service.AuthorizedMerchantService;
 import io.chainmind.myriadapi.service.OrganizationService;
 import io.chainmind.myriadapi.service.ValidationUtils;
 import io.chainmind.myriadapi.utils.CommonUtils;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/vouchers")
 public class VoucherController {
-	private static final Logger LOG = LoggerFactory.getLogger(VoucherController.class);
-
 	@Autowired
 	private VoucherClient voucherClient;
 
@@ -88,7 +91,7 @@ public class VoucherController {
             @RequestParam(name="type", required = false, defaultValue="COUPON") VoucherType type) {
 		
 		PageRequest pageRequest = PageRequest.of(page, size, CommonUtils.parseSort(sort));
-		LOG.debug("GET /api/vouchers: sorts: {}", pageRequest.getSort());
+		log.debug("GET /api/vouchers: sorts: {}", pageRequest.getSort());
 		// query account id based on given ownerId and idType
 		Account account = accountService.findByCode(ownerId, idType);	
 		
@@ -100,7 +103,7 @@ public class VoucherController {
 			// new account, return an empty list response
 			return emptyResponse();
 		}
-		LOG.debug("getVouchers.account: {}", account.getId());
+		log.debug("getVouchers.account: {}", account.getId());
 		
 		// query merchant id
 		String merchantId = null;
@@ -109,11 +112,11 @@ public class VoucherController {
 				Organization merchant = organizationService.findByCode(merchantCode, codeType);
 				merchantId = merchant.getId().toString();
 			} catch(Exception e) {
-				LOG.info("getVouchers.merchant({}): {}", merchantCode, e.getMessage());
+				log.info("getVouchers.merchant({}): {}", merchantCode, e.getMessage());
 				return emptyResponse();
 			}
 		}
-		LOG.debug("getVouchers.merchantId: {}", merchantId);
+		log.debug("getVouchers.merchantId: {}", merchantId);
 		
 		// excludes NEW vouchers
 		return voucherClient.queryVouchers(pageRequest, account.getId().toString(), null, null, 
@@ -131,9 +134,9 @@ public class VoucherController {
 	
     @GetMapping("/{id}")
 	public VoucherDetailsResponse getVoucherById(@PathVariable(name = "id") String voucherId) {
-    	LOG.debug("getVoucherById: " + voucherId);
+    	log.debug("getVoucherById: " + voucherId);
     	VoucherResponse voucher = voucherClient.findVoucherById(voucherId);
-    	LOG.debug("response: " + voucher.getId());
+    	log.debug("response: " + voucher.getId());
     	// replace issuer (id) with issuer name
     	voucher.setIssuer(organizationService.findById(Long.valueOf(voucher.getIssuer())).getName());
     	
@@ -281,6 +284,41 @@ public class VoucherController {
     	return 0;
     }
 
-
+    /**
+     * Customer collects a voucher
+     * @param campaignId the campaign where the voucher is collected from
+     * @param customerId identifier of the customer who collects a voucher
+     * @param idType customer id type, e.g. ID, CELLPHONE, EMAIL or SOURCE_ID
+     * @return
+     */
+    @GetMapping("/collect")
+    public DistributeVoucherResponse create(
+            @RequestParam(name="campaignId", required = true) String campaignId,
+            @RequestParam(name="customerId", required = true) String customerId,
+            @RequestParam(name="idType", required = false, defaultValue="ID") CodeType idType 
+    	) {
+    	// find customer account
+		Account account = accountService.findByCode(customerId, idType);			
+		// try to register an account
+		if (account == null) {
+			// try to register an account
+			if(!CodeType.ID.equals(idType))
+				account = accountService.register(customerId, idType);	
+		}
+		if (account == null)
+			throw new ApiException(HttpStatus.NOT_FOUND,"account.notFound");
+		log.debug("Customer {} with account id {}", customerId, account.getId());
+		// create an audience object
+    	Audience audience = Audience.builder()
+    			.id(account.getId().toString())
+    			.build();
+    	CollectVoucherRequest req = CollectVoucherRequest.builder()
+    			.campaignId(campaignId)
+    			.channel(requestUser.getAppId()) // app
+    			.audience(audience)
+    			.build();
+    	log.debug("send request to voucher services...");
+    	return voucherClient.create(req);
+    }
 
 }

@@ -16,7 +16,6 @@ import lombok.NoArgsConstructor;
 public class Audience {
 	@NotBlank
 	private String id;
-	// comma-separated string representing customer tags
 	private List<Following> followings;
 	
 	@Getter

@@ -17,19 +17,21 @@ import org.springframework.security.core.AuthenticationException;
 import io.chainmind.myriadapi.domain.RequestUser;
 import io.chainmind.myriadapi.domain.entity.AppRegistration;
 import io.chainmind.myriadapi.service.AppRegistrationService;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @Order(1)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
-    @Value("${myriad.http.auth-token-header-name}")
+    @Value("${myriad.http.auth-token-header-name:x-app-id}")
     private String authTokenHeaderName;
     
 	@Autowired
 	private AppRegistrationService appRegistrationService;
 	
 	@Autowired
-	private RequestUser requestOrg;
+	private RequestUser requestUser;
 	
 	@Override
 	public void configure(WebSecurity web) throws Exception {
@@ -51,11 +53,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         			throw new BadCredentialsException("The App Id was not found or not the expected value.");
         		}
         		// set request scope bean value
-        		requestOrg.setAppId(principal);
-        		requestOrg.setAppOrg(registration.getOrg());
+        		requestUser.setAppId(principal);
+        		requestUser.setAppOrg(registration.getOrg());
         		// by default use current principal as the request user id
-//        		requestOrg.setId(principal);
-        		
+        		requestUser.setId(principal);
+        		log.debug("---------> default request user: {}", requestUser);
                 authentication.setAuthenticated(true);
                 return authentication;
             }
@@ -67,5 +69,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).
             and().addFilter(filter).authorizeRequests().anyRequest().authenticated();
     }
+    
+    
 
 }
