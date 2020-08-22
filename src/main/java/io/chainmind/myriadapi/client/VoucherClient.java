@@ -31,8 +31,8 @@ import io.chainmind.myriad.domain.dto.redemption.CreateRedemptionRequest;
 import io.chainmind.myriad.domain.dto.redemption.CreateRedemptionResponse;
 import io.chainmind.myriad.domain.dto.voucher.BatchTransferRequest;
 import io.chainmind.myriad.domain.dto.voucher.BatchTransferResponse;
-import io.chainmind.myriad.domain.dto.voucher.QualifyRequest;
-import io.chainmind.myriad.domain.dto.voucher.QualifyResult;
+import io.chainmind.myriad.domain.dto.voucher.QualifyVoucherRequest;
+import io.chainmind.myriad.domain.dto.voucher.QualifyVoucherResult;
 import io.chainmind.myriad.domain.dto.voucher.TransferVoucherRequest;
 import io.chainmind.myriad.domain.dto.voucher.TransferVoucherResponse;
 import io.chainmind.myriad.domain.dto.voucher.UsageStatus;
@@ -77,8 +77,9 @@ public interface VoucherClient {
     BatchTransferResponse batchTransfer(@RequestBody @Valid BatchTransferRequest req);
     
     @PostMapping("/vouchers/{id}/qualify")
-    QualifyResult qualify(@PathVariable(name = "id") String voucherId, @Valid @RequestBody QualifyRequest req);
-
+    QualifyVoucherResult qualifyVoucher(@PathVariable(name = "id") String voucherId, 
+    		@Valid @RequestBody QualifyVoucherRequest req);
+    
 	@PostMapping("/distributions")
 	DistributeVoucherResponse distributeVoucher(@Valid @RequestBody DistributeVoucherRequest req);
 	

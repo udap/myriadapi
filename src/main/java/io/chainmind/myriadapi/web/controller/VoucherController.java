@@ -10,8 +10,6 @@ import java.util.Optional;
 
 import javax.validation.Valid;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -35,8 +33,8 @@ import io.chainmind.myriad.domain.dto.distribution.CollectVoucherRequest;
 import io.chainmind.myriad.domain.dto.distribution.DistributeVoucherResponse;
 import io.chainmind.myriad.domain.dto.voucher.BatchTransferRequest;
 import io.chainmind.myriad.domain.dto.voucher.BatchTransferResponse;
-import io.chainmind.myriad.domain.dto.voucher.QualifyRequest;
-import io.chainmind.myriad.domain.dto.voucher.QualifyResult;
+import io.chainmind.myriad.domain.dto.voucher.QualifyVoucherRequest;
+import io.chainmind.myriad.domain.dto.voucher.QualifyVoucherResult;
 import io.chainmind.myriad.domain.dto.voucher.TransferVoucherRequest;
 import io.chainmind.myriad.domain.dto.voucher.TransferVoucherResponse;
 import io.chainmind.myriad.domain.dto.voucher.UsageStatus;
@@ -48,7 +46,7 @@ import io.chainmind.myriadapi.client.VoucherClient;
 import io.chainmind.myriadapi.domain.CodeType;
 import io.chainmind.myriadapi.domain.RequestUser;
 import io.chainmind.myriadapi.domain.dto.OrgDTO;
-import io.chainmind.myriadapi.domain.dto.QualifyCouponRequest;
+import io.chainmind.myriadapi.domain.dto.QueryQualifiedCouponsRequest;
 import io.chainmind.myriadapi.domain.dto.VoucherDetailsResponse;
 import io.chainmind.myriadapi.domain.entity.Account;
 import io.chainmind.myriadapi.domain.entity.AuthorizedMerchant;
@@ -78,6 +76,19 @@ public class VoucherController {
 	@Autowired
 	private OrganizationService organizationService;
 	
+	/**
+	 * TODO: remove merchantCode and codeType to ensure returning only owner's vouchers
+	 * @param page
+	 * @param size
+	 * @param sort
+	 * @param ownerId
+	 * @param status
+	 * @param merchantCode
+	 * @param idType
+	 * @param codeType
+	 * @param type
+	 * @return
+	 */
 	@GetMapping
 	public PaginatedResponse<VoucherListItem> getVouchers(
             @RequestParam(name="page", required=false, defaultValue="0") int page,
@@ -111,12 +122,19 @@ public class VoucherController {
 			try {
 				Organization merchant = organizationService.findByCode(merchantCode, codeType);
 				merchantId = merchant.getId().toString();
+				// this is a quick hack to allow returning top ancestor's vouchers
+				Organization topAncestor = organizationService.findTopAncestor(merchant);
+				if (!Objects.equals(topAncestor.getId(), merchant.getId())) {
+					merchantId = merchant.getId().toString().concat(",").concat(topAncestor.getId().toString());
+				}
+				
 			} catch(Exception e) {
 				log.info("getVouchers.merchant({}): {}", merchantCode, e.getMessage());
 				return emptyResponse();
 			}
+
+			log.debug("merchant ids: {}", merchantId);
 		}
-		log.debug("getVouchers.merchantId: {}", merchantId);
 		
 		// excludes NEW vouchers
 		return voucherClient.queryVouchers(pageRequest, account.getId().toString(), null, null, 
@@ -192,27 +210,29 @@ public class VoucherController {
 		requestUser.setId(req.getReqUser());
     	return voucherClient.batchTransfer(req);
     }
-    
+        
     @PostMapping("/qualify")
-    public List<VoucherListItem> qualifyCoupons(@Valid @RequestBody QualifyCouponRequest req) {
-    	Organization merchant = organizationService.findByCode(req.getMerchantCode().getId(), req.getMerchantCode().getType());
-		Organization topAncestor = organizationService.findTopAncestor(merchant);
-		boolean isTopAncestor = Objects.equals(topAncestor.getId(), merchant.getId());
-    	
+    public List<VoucherListItem> queryQualifiedCoupons(@Valid @RequestBody QueryQualifiedCouponsRequest req) {
     	Account account = accountService.findByCode(req.getCustomerCode().getId(), req.getCustomerCode().getType());
     	if (account == null) {
     		// create an account
     		account = accountService.register(req.getCustomerCode().getId(), req.getCustomerCode().getType());
+    		return Collections.emptyList();
     	}
-    	
-    	List<VoucherListItem> qualifiedVouchers = new ArrayList<>();
 
+    	// TODO: query merchant and its ancestors
+    	Organization merchant = organizationService.findByCode(req.getMerchantCode().getId(), req.getMerchantCode().getType());
+		Organization topAncestor = organizationService.findTopAncestor(merchant);
+		boolean isTopAncestor = Objects.equals(topAncestor.getId(), merchant.getId());
+    	    	
+    	List<VoucherListItem> qualifiedVouchers = new ArrayList<>();
+    	
     	int totalPages = 0;
     	int page = 0;
     	do {
     		// query active vouchers excluding NEW vouchers (do not specify merchant id because rules may be 
         	// based on merchant tags rather than specific merchant)
-	    	PaginatedResponse<VoucherListItem> vouchers = voucherClient.queryVouchers(PageRequest.of(page++, req.getLimit()), 
+	    	PaginatedResponse<VoucherListItem> vouchers = voucherClient.queryVouchers(PageRequest.of(page++, 100), 
 	    			account.getId().toString(), null, null, null, 
 	    			VoucherType.COUPON, UsageStatus.ACTIVE, true, null);
 	    	totalPages = vouchers.getTotal();
@@ -222,12 +242,11 @@ public class VoucherController {
 	    		AuthorizedMerchant amAncestor = (isTopAncestor)?am:merchantService.find(marketer, topAncestor);
 	    		Optional<Merchant> m = ValidationUtils.prepareMerchantFacts(merchant, topAncestor, am, amAncestor);
 	    		if (!m.isPresent()) continue;
-	    		QualifyResult result = voucherClient.qualify(v.getId(), 
-    				QualifyRequest.builder()
-	    				.customerId(account.getId().toString())
+	    		QualifyVoucherResult result = voucherClient.qualifyVoucher(v.getId(), 
+    				QualifyVoucherRequest.builder()
 	    				.merchant(m.get())
 	    				.order(req.getOrder())
-	    				.voucherId(v.getId())
+	    				.id(v.getId())
 	    				.build());
 	    		if (result.isQualified())
 	    			qualifiedVouchers.add(v);

@@ -10,15 +10,9 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class QualifyRequest {
-	// voucher to be examined for redemption qualificaiton
+public class QualifyVoucherRequest {
 	@NotBlank
-	private String voucherId;
-	
-	// the customer
-	@NotBlank
-	private String customerId;
-	
+	private String id;
 	// merchant where qualified vouchers will be redeemed for the order
 	@NotNull
 	private Merchant merchant;
@@ -26,18 +20,4 @@ public class QualifyRequest {
 	// the order which qualified vouchers will be applied to
 	private Order order;
 
-//	// the customer
-//	@NotBlank
-//	private String customerId;
-//	
-//	// merchant where qualified vouchers will be redeemed for the order
-//	@NotBlank
-//	private String merchantId;
-//	
-//	// the order which qualified vouchers will be applied to
-//	private Order order;
-//	
-//	private VoucherType voucherType;
-//
-//	private int limit;
 }

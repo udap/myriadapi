@@ -6,7 +6,7 @@ import io.chainmind.myriad.domain.common.Order;
 import lombok.Data;
 
 @Data
-public class QualifyCouponRequest {
+public class QueryQualifiedCouponsRequest {
 	@NotNull
 	private Code customerCode;
 	@NotNull
@@ -14,6 +14,7 @@ public class QualifyCouponRequest {
 	
 	// the order which qualified vouchers will be applied to
 	private Order order;
+	@NotNull
 	private Integer limit = 100;
 
 }

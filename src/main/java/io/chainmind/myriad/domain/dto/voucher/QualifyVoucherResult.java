@@ -1,11 +1,9 @@
 package io.chainmind.myriad.domain.dto.voucher;
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 
-@Getter
-@Builder
-public class QualifyResult {
+@Data
+public class QualifyVoucherResult {
 	private String voucherId;
 	private boolean qualified;
 }
