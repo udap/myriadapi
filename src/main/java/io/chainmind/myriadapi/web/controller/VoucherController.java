@@ -124,12 +124,14 @@ public class VoucherController {
 				merchantId = merchant.getId().toString();
 				// this is a quick hack to allow returning top ancestor's vouchers
 				Organization topAncestor = organizationService.findTopAncestor(merchant);
-				if (!Objects.equals(topAncestor.getId(), merchant.getId())) {
+				if (Objects.nonNull(topAncestor) && Objects.nonNull(merchant) 
+						&& !Objects.equals(topAncestor.getId(), merchant.getId())) {
 					merchantId = merchant.getId().toString().concat(",").concat(topAncestor.getId().toString());
 				}
 				
 			} catch(Exception e) {
-				log.info("getVouchers.merchant({}): {}", merchantCode, e.getMessage());
+				log.info("getVouchers.merchant({}): {}", merchantCode, e);
+				e.printStackTrace();
 				return emptyResponse();
 			}
 
