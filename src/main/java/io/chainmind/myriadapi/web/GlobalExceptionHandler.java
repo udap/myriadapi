@@ -45,8 +45,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(ApiException.class)
 	@ResponseBody
 	public ResponseEntity<Object> apiErrorHandler(ApiException apiException) throws Exception {
-//		logger.debug("ApiException [ {} ]", apiException.getMessage());
-		return new ResponseEntity<Object>(apiException.getBody(), apiException.getStatus());
+		return new ResponseEntity<Object>(apiException.getMessage(), apiException.getStatus());
 	}
 
 	@ExceptionHandler(value = MethodArgumentNotValidException.class)
@@ -67,14 +66,15 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(value = MethodArgumentTypeMismatchException.class)
 	@ResponseBody
 	public ResponseEntity<String> methodArgumentTypeMismatch(HttpServletRequest req,
-															 MethodArgumentTypeMismatchException exception) throws Exception {
+			MethodArgumentTypeMismatchException exception) throws Exception {
 		logger.debug("异常了------", exception);
 		return new ResponseEntity<String>(exception.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	@ExceptionHandler(value = MultipartException.class)
 	@ResponseBody
-	public ResponseEntity<String> multipartErrorHandler(HttpServletRequest req, MultipartException ex) throws Exception {
+	public ResponseEntity<String> multipartErrorHandler(HttpServletRequest req, 
+			MultipartException ex) throws Exception {
 //		Result<Object> result = new Result<Object>();
 //		result.setRetcode(Result.SC_ERROR);
 //		result.setMsg("上传的单个文件要小于" + maxFileSize + "。多个文件大小之和要小于：" + maxRequestSize);

@@ -42,29 +42,31 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Cacheable(value = CacheConfiguration.ORGANIZATION_CACHE_BY_CODE, unless = "#result == null")
     @Override
     public Organization findByCode(String code, CodeType codeType) {
-        Organization merchant = null;
+        Organization organization = null;
         if (codeType.equals(CodeType.ID)) {
-        	Optional<Organization> merchantOpt = orgRepo.findById(Long.valueOf(code));
-        	if (merchantOpt.isPresent())
-        		merchant = merchantOpt.get();
+        	Optional<Organization> organizationOpt = orgRepo.findById(Long.valueOf(code));
+        	if (organizationOpt.isPresent())
+        		organization = organizationOpt.get();
         }
         else if (codeType.equals(CodeType.LICENSE))
-            merchant = orgRepo.findByLicenseNo(code);
+        	organization = orgRepo.findByLicenseNo(code);
         else if (codeType.equals(CodeType.UPCODE))
-            merchant = orgRepo.findByUpCode(code);
+        	organization = orgRepo.findByUpCode(code);
         else if (codeType.equals(CodeType.APCODE))
-            merchant = orgRepo.findByApCode(code);
+        	organization = orgRepo.findByApCode(code);
         else if (codeType.equals(CodeType.WPCODE))
-            merchant = orgRepo.findByWpCode(code);
-        else
-            throw new ApiException(HttpStatus.BAD_REQUEST, "unknown code type");
-
-        if (merchant == null)
-            throw new ApiException(HttpStatus.NOT_FOUND, "merchant.notFound");
-        if (!merchant.getStatus().equals(OrganizationStatus.ACTIVE))
-        	throw new ApiException(HttpStatus.FORBIDDEN, "merchant.inactive");
+        	organization = orgRepo.findByWpCode(code);
+        else {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "organization.invalidType");
+        }
         
-        return merchant;
+        if (organization == null)
+            throw new ApiException(HttpStatus.NOT_FOUND, "organization.notFound");
+        
+        if (!organization.getStatus().equals(OrganizationStatus.ACTIVE))
+        	throw new ApiException(HttpStatus.FORBIDDEN, "organization.inactive");
+        
+        return organization;
     }
 
 

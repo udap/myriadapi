@@ -37,8 +37,10 @@ public class AccountServiceImpl implements AccountService {
 			account = accountRepo.findByCellphone(code);
 		} else if (CodeType.EMAIL.equals(codeType)){
 			account = accountRepo.findByName(code);
+		} else if (CodeType.SOURCE_ID.equals(codeType)) {
+			account = accountRepo.findBySourceId(code);
 		} else {
-			throw new ApiException(HttpStatus.BAD_REQUEST, "非法的ID类型");
+			throw new ApiException(HttpStatus.BAD_REQUEST, "account.invalidCodeType");
 		}
 		return account;
 	}
@@ -56,13 +58,13 @@ public class AccountServiceImpl implements AccountService {
 
 		if (CodeType.CELLPHONE.equals(codeType)) {
 			if (!CommonUtils.validateCellphone(code))
-				throw new ApiException(HttpStatus.BAD_REQUEST, "非法的手机号码");
+				throw new ApiException(HttpStatus.BAD_REQUEST, "registration.invalidPhoneNumber");
 			account.setCellphone(code);			
 		}
 		
 		if (CodeType.EMAIL.equals(codeType)) {
 			if (!CommonUtils.validateEmail(code))
-				throw new ApiException(HttpStatus.BAD_REQUEST, "非法的电子邮件地址");
+				throw new ApiException(HttpStatus.BAD_REQUEST, "registration.invalidEmail");
 		}
 		
 		if (CodeType.SOURCE_ID.equals(codeType))

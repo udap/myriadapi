@@ -111,10 +111,17 @@ public class VoucherController {
 			// try to register an account
 			if(!CodeType.ID.equals(idType))
 				account = accountService.register(ownerId, idType);	
+			else {
+				log.warn("query account by id {} returned null", ownerId);
+				throw new ApiException(HttpStatus.NOT_FOUND, "account.notFound");
+			}
 			// new account, return an empty list response
 			return emptyResponse();
 		}
 		log.debug("getVouchers.account: {}", account.getId());
+		
+		// TODO: we must ensure the user of the account has granted permissions to current app or the account is
+		// owned by current app or organization
 		
 		// query merchant id
 		String merchantId = null;
@@ -130,8 +137,7 @@ public class VoucherController {
 				}
 				
 			} catch(Exception e) {
-				log.info("getVouchers.merchant({}): {}", merchantCode, e);
-				e.printStackTrace();
+				log.warn("query merchant by code {} and type {} raised exception {}", merchantCode, codeType, e.getMessage());
 				return emptyResponse();
 			}
 

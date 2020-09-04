@@ -11,5 +11,7 @@ public interface AccountRepository
 	Account findByCellphone(String cellphone);
 	
 	Account findByName(String name);
+	
+	Account findBySourceId(String sourceId);
 
 }
