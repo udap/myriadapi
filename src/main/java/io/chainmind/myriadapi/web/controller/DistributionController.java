@@ -1,12 +1,12 @@
 package io.chainmind.myriadapi.web.controller;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.validation.Valid;
 
+import io.chainmind.myriad.domain.dto.campaign.CampaignResponse;
+import io.chainmind.myriad.domain.dto.distribution.CollectVoucherRequest;
+import io.chainmind.myriadapi.domain.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
@@ -23,10 +23,6 @@ import io.chainmind.myriad.domain.dto.distribution.DistributeVoucherResponse;
 import io.chainmind.myriadapi.client.VoucherClient;
 import io.chainmind.myriadapi.domain.CodeType;
 import io.chainmind.myriadapi.domain.RequestUser;
-import io.chainmind.myriadapi.domain.dto.BatchStatus;
-import io.chainmind.myriadapi.domain.dto.DistributeToCustomersRequest;
-import io.chainmind.myriadapi.domain.dto.DistributeToSingleCustomerRequest;
-import io.chainmind.myriadapi.domain.dto.DistributionMode;
 import io.chainmind.myriadapi.domain.entity.Account;
 import io.chainmind.myriadapi.domain.entity.Customer;
 import io.chainmind.myriadapi.domain.entity.Employee;
@@ -82,16 +78,42 @@ public class DistributionController {
 		if (customer == null) 
 			throw new ApiException(HttpStatus.NOT_FOUND, "customer.notFound");
 
-		DistributeVoucherRequest mReq = new DistributeVoucherRequest();
-		mReq.setChannel(req.getChannel());
-		mReq.setCustomerId(customer.getId().toString());
-		mReq.setMetadata(req.getMetadata());
-		mReq.setReqOrg(req.getReqOrg());
-		mReq.setReqUser(req.getReqUser());
-		mReq.setVoucherId(req.getVoucherId());
-		mReq.setCampaignId(req.getCampaignId());
-		requestUser.setId(mReq.getReqUser());
-		return voucherClient.distributeVoucher(mReq);
+		//组装请求数据
+		Audience audience = Audience.builder()
+				.id(customer.getAccount().getId().toString())
+				.build();
+		DistributeVoucherRequest voucherRequest = DistributeVoucherRequest.builder()
+				.reqUser(mgrAccount.getId().toString())
+				.reqOrg(org.getId().toString())
+				.campaignId(req.getCampaignId())
+				.voucherId(req.getVoucherId())
+				.channel(req.getChannel().name())
+				.metadata(req.getMetadata())
+				.audience(audience)
+				.build();
+		return voucherClient.distributeVoucher(voucherRequest);
+	}
+
+	@PostMapping("/collect")
+	public DistributeVoucherResponse create(@Valid @RequestBody ApiCollectVoucherRequest req){
+		Account customerAccount = accountService.findByCode(req.getCustomerId(), req.getCustomerIdType());
+		//CampaignResponse campaign = campaignClient.findById(UUID.fromString(campaignId));
+		//  添加用户到活动创建机构，作为客户
+		//Organization org = orgService.find(Long.valueOf(campaign.getOwner()));
+		//组装请求数据
+		Audience audience = Audience.builder()
+				.id(customerAccount.getId().toString())
+				.build();
+		CollectVoucherRequest request = CollectVoucherRequest.builder()
+				.campaignId(req.getCampaignId())
+				.audience(audience)
+				.channel(req.getChannel().name())
+				.metadata(req.getMetadata())
+				.build();
+		DistributeVoucherResponse response = voucherClient.create(request);
+//		customerService.findOrCreate(org, currentAccount, null, "个人版直接领券加入");
+		return response;
+
 	}
 	
 	@PostMapping("/batch")

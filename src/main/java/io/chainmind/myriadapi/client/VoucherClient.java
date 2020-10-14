@@ -87,7 +87,7 @@ public interface VoucherClient {
 	BatchDistributionResponse distributeVouchers(@Valid @RequestBody BatchDistributionRequest req);
 	
 	@PostMapping("/distributions/collect")
-	public DistributeVoucherResponse create(@Valid @RequestBody CollectVoucherRequest req);
+	DistributeVoucherResponse create(@Valid @RequestBody CollectVoucherRequest req);
     
     @PostMapping(value="/redemptions")
 	CreateRedemptionResponse createRedemption(@Valid @RequestBody CreateRedemptionRequest req);
