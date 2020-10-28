@@ -23,4 +23,10 @@ public class SimpleVoucherConfig {
 
 	private DiscountResponse discount;// COUPON
 
+	// GiftConfig
+	private String productName;
+	private String productCode;
+	private Long productMarketPrice;
+	private Long productExchangePrice;
+
 }
