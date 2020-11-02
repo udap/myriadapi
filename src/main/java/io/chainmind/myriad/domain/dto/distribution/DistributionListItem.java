@@ -11,9 +11,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class DistributionListItem {
+
 	private String id;
 	private SimpleVoucherItem voucher;
 	private NamedCampaign campaign;
+	private String orgId;
 	private String fromOwner;
 	// customer whom the voucher is distributed to
 	private String customerId;
@@ -23,5 +25,17 @@ public class DistributionListItem {
 	private DistributionStatus status;
 	private LocalDateTime updatedAt;
 	// error code if distribution fails
-	private String errorCode;	
+	private String errorCode;
+
+	// coupon voucher
+	private String discountType;
+	// discount off
+	private Integer discountOff;
+	// gift voucher
+	private String productName;
+	private String productCode;
+	private Long productMarketPrice;
+	private Long productExchangePrice;
+
+
 }
