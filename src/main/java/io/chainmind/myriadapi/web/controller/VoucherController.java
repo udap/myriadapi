@@ -99,7 +99,7 @@ public class VoucherController {
             @RequestParam(name="merchantCode", required = false) String merchantCode,
             @RequestParam(name="idType", required = false, defaultValue="ID") CodeType idType,
             @RequestParam(name="codeType", required = false, defaultValue="ID") CodeType codeType,
-            @RequestParam(name="type", required = false, defaultValue="COUPON") VoucherType type) {
+            @RequestParam(name="type", required = false) VoucherType type) {
 		
 		PageRequest pageRequest = PageRequest.of(page, size, CommonUtils.parseSort(sort));
 		log.debug("GET /api/vouchers: sorts: {}", pageRequest.getSort());
