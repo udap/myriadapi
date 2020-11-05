@@ -1,12 +1,16 @@
 package io.chainmind.myriadapi.utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+import io.chainmind.myriadapi.domain.CodeType;
+import io.chainmind.myriadapi.domain.dto.Code;
 
 public class CommonUtils {	
 	public final static String REGEX_PHONE = "^1[3456789][0-9]{9}$";
@@ -113,5 +117,23 @@ public class CommonUtils {
 			}
 		});
 		return Sort.by(orders);
+	}
+	
+	public static List<Code> parseCodes(String mixedCodes) {
+		if (!StringUtils.hasText(mixedCodes))
+			return Collections.emptyList();
+		List<Code> codes = new ArrayList<>();
+		StringUtils.commaDelimitedListToSet(mixedCodes).forEach(mc->{
+			if (!mc.contains(":"))
+				codes.add(Code.builder().id(mc).type(CodeType.ID).build());
+			else {
+				int index = mc.indexOf(':');
+				codes.add(Code.builder()
+						.id(mc.substring(index+1))
+						.type(CodeType.valueOf(mc.substring(0,index)))
+						.build());		
+			}
+		});		
+		return codes;
 	}
 }

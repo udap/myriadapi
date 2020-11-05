@@ -1,6 +1,7 @@
 package io.chainmind.myriadapi.service.impl;
 
 import java.util.Date;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,15 +37,17 @@ public class AccountServiceImpl implements AccountService {
 		} else if (CodeType.CELLPHONE.equals(codeType)) {
 			account = accountRepo.findByCellphone(code);
 		} else if (CodeType.EMAIL.equals(codeType)){
-			account = accountRepo.findByName(code);
+			account = accountRepo.findByEmail(code);
 		} else if (CodeType.SOURCE_ID.equals(codeType)) {
-			account = accountRepo.findBySourceId(code);
+			account = accountRepo.findByOrganizationIdAndSourceId(requestOrg.getId(),code);
+		} else if (CodeType.NAME.equals(codeType)) {
+			account = accountRepo.findByName(code);
 		} else {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "account.invalidCodeType");
 		}
 		return account;
 	}
-	
+		
 	@Override
 	public Account register(String code, CodeType codeType) {
 		if (!CodeType.CELLPHONE.equals(codeType) && !CodeType.EMAIL.equals(codeType)
@@ -52,7 +55,6 @@ public class AccountServiceImpl implements AccountService {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "非法的ID类型");
 
 		Account account = new Account();
-		account.setName(code);
 		account.setCreateTime(new Date());
 		account.setEnabled(true);
 
@@ -60,18 +62,22 @@ public class AccountServiceImpl implements AccountService {
 			if (!CommonUtils.validateCellphone(code))
 				throw new ApiException(HttpStatus.BAD_REQUEST, "registration.invalidPhoneNumber");
 			account.setCellphone(code);			
+			account.setName(code);
 		}
 		
 		if (CodeType.EMAIL.equals(codeType)) {
 			if (!CommonUtils.validateEmail(code))
 				throw new ApiException(HttpStatus.BAD_REQUEST, "registration.invalidEmail");
+			account.setEmail(code);
+			account.setName(code);
 		}
 		
-		if (CodeType.SOURCE_ID.equals(codeType))
+		if (CodeType.SOURCE_ID.equals(codeType)) {
 			account.setSourceId(code);
-
+			account.setName(requestOrg.getAppOrg().getId().toString() + "-" + code);
+		}
 		// IMPORTANT
-		account.setAppId(requestOrg.getAppId());
+		account.setOrganizationId(requestOrg.getAppOrg().getId().toString());
 		
 		return accountRepo.save(account);
 	}

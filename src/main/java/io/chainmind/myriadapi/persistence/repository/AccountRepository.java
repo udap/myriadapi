@@ -12,6 +12,7 @@ public interface AccountRepository
 	
 	Account findByName(String name);
 	
-	Account findBySourceId(String sourceId);
-
+	Account findByEmail(String email);
+	
+	Account findByOrganizationIdAndSourceId(String organizationId, String sourceId);
 }

@@ -45,6 +45,7 @@ import io.chainmind.myriad.domain.dto.voucher.config.SimpleVoucherConfig;
 import io.chainmind.myriadapi.client.VoucherClient;
 import io.chainmind.myriadapi.domain.CodeType;
 import io.chainmind.myriadapi.domain.RequestUser;
+import io.chainmind.myriadapi.domain.dto.Code;
 import io.chainmind.myriadapi.domain.dto.OrgDTO;
 import io.chainmind.myriadapi.domain.dto.QueryQualifiedCouponsRequest;
 import io.chainmind.myriadapi.domain.dto.VoucherDetailsResponse;
@@ -104,22 +105,31 @@ public class VoucherController {
 		PageRequest pageRequest = PageRequest.of(page, size, CommonUtils.parseSort(sort));
 		log.debug("GET /api/vouchers: sorts: {}", pageRequest.getSort());
 		// query account id based on given ownerId and idType
-		Account account = accountService.findByCode(ownerId, idType);	
+		String accountIds = null;
+		if (CodeType.MIXED.equals(idType)) {
+			List<String> accountIdList = new ArrayList<>();
+			// ownerId is in a mixed format like CELLPHONE:18621991234,SOURCE_ID:123,CELLPHONE:17600786111
+			List<Code> codes = CommonUtils.parseCodes(ownerId);
+			codes.forEach(mc->{
+				Account account = getOrCreateAccount(mc.getId(), mc.getType());	
+				if (account != null)
+					accountIdList.add(account.getId().toString());
+			});
+			// convert to comma-separated list
+			if (!accountIdList.isEmpty())
+				accountIds = StringUtils.collectionToCommaDelimitedString(accountIdList);
+		} else {
+			Account account = getOrCreateAccount(ownerId,idType);
+			if (account != null)
+				accountIds = account.getId().toString();
+		}	
 		
-		// try to register an account
-		if (account == null) {
-			// try to register an account
-			if(!CodeType.ID.equals(idType))
-				account = accountService.register(ownerId, idType);	
-			else {
-				log.warn("query account by id {} returned null", ownerId);
-				throw new ApiException(HttpStatus.NOT_FOUND, "account.notFound");
-			}
+		if (!StringUtils.hasText(accountIds))
 			// new account, return an empty list response
 			return emptyResponse();
-		}
-		log.debug("getVouchers.account: {}", account.getId());
-		
+
+		log.debug("getVouchers.account: {}", accountIds);
+
 		// TODO: we must ensure the user of the account has granted permissions to current app or the account is
 		// owned by current app or organization
 		
@@ -145,8 +155,23 @@ public class VoucherController {
 		}
 		
 		// excludes NEW vouchers
-		return voucherClient.queryVouchers(pageRequest, account.getId().toString(), null, null, 
+		return voucherClient.queryVouchers(pageRequest, accountIds, null, null, 
 				merchantId, type, status, true, null);
+	}
+		
+	private Account getOrCreateAccount(String ownerId, CodeType idType) {
+		Account account = accountService.findByCode(ownerId, idType);	
+		// try to register an account
+		if (account == null) {
+			// try to register an account
+			if(!CodeType.ID.equals(idType)) {
+				account = accountService.register(ownerId, idType);	
+			}
+			else {
+				log.warn("query account by id {} returned null", ownerId);
+			}
+		}
+		return account;
 	}
 	
 	private PaginatedResponse<VoucherListItem> emptyResponse() {
@@ -163,6 +188,9 @@ public class VoucherController {
     	log.debug("getVoucherById: " + voucherId);
     	VoucherResponse voucher = voucherClient.findVoucherById(voucherId);
     	log.debug("response: " + voucher.getId());
+    	
+    	// TODO: disallow query if voucher's issuer is not the appOrg or is not a subsidiary of current appOrg
+    	
     	// replace issuer (id) with issuer name
     	voucher.setIssuer(organizationService.findById(Long.valueOf(voucher.getIssuer())).getName());
     	

@@ -20,6 +20,7 @@ public class Account extends UidEntity {
 	@Column(nullable = false)
 	private String password;
 	private String cellphone;
+	private String email;
 	private String sourceId;
 	private boolean enabled;
 	private LocalDateTime expiryTime;
@@ -29,6 +30,7 @@ public class Account extends UidEntity {
 	private Account referer; // 邀请人，被谁邀请注册
 
 	private String name;
-	private String appId;
+	// which org creates the account
+	private String organizationId;
 
 }
