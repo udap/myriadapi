@@ -10,4 +10,5 @@ public class SimpleVoucherItem {
 	private String id;
 	private String code;
 	private String issuer;
+	private String type;
 }
