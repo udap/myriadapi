@@ -26,7 +26,7 @@ public class SimpleVoucherConfig {
 	// GiftConfig
 	private String productName;
 	private String productCode;
-	private Long productMarketPrice;
-	private Long productExchangePrice;
+	private Integer productMarketPrice;
+	private Integer productExchangePrice;
 
 }
