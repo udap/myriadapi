@@ -32,6 +32,9 @@ public class DistributeToSingleCustomerRequest {
 	@NotBlank
 	private String customerId;
 	
+	// specify the organization that manages the customer
+	private String customerOrgId;
+	
 	private CodeType customerIdType = CodeType.ID;
 	
 	private Channel channel = Channel.API;

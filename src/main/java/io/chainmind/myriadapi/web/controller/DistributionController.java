@@ -1,12 +1,12 @@
 package io.chainmind.myriadapi.web.controller;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 
-import io.chainmind.myriad.domain.dto.campaign.CampaignResponse;
-import io.chainmind.myriad.domain.dto.distribution.CollectVoucherRequest;
-import io.chainmind.myriadapi.domain.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
@@ -16,13 +16,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.chainmind.myriad.domain.common.Audience;
-import io.chainmind.myriad.domain.common.Audience.Following;
 import io.chainmind.myriad.domain.dto.distribution.BatchDistributionResponse;
+import io.chainmind.myriad.domain.dto.distribution.CollectVoucherRequest;
 import io.chainmind.myriad.domain.dto.distribution.DistributeVoucherRequest;
 import io.chainmind.myriad.domain.dto.distribution.DistributeVoucherResponse;
 import io.chainmind.myriadapi.client.VoucherClient;
 import io.chainmind.myriadapi.domain.CodeType;
 import io.chainmind.myriadapi.domain.RequestUser;
+import io.chainmind.myriadapi.domain.dto.ApiCollectVoucherRequest;
+import io.chainmind.myriadapi.domain.dto.BatchStatus;
+import io.chainmind.myriadapi.domain.dto.DistributeToCustomersRequest;
+import io.chainmind.myriadapi.domain.dto.DistributeToSingleCustomerRequest;
+import io.chainmind.myriadapi.domain.dto.DistributionMode;
 import io.chainmind.myriadapi.domain.entity.Account;
 import io.chainmind.myriadapi.domain.entity.Customer;
 import io.chainmind.myriadapi.domain.entity.Employee;
@@ -78,9 +83,15 @@ public class DistributionController {
 		if (customer == null) 
 			throw new ApiException(HttpStatus.NOT_FOUND, "customer.notFound");
 
+		String serviceOrgId = customer.getOrg().getId().toString();
+		if (StringUtils.hasText(req.getCustomerOrgId()))
+			serviceOrgId = req.getCustomerOrgId();
 		//组装请求数据
 		Audience audience = Audience.builder()
 				.id(customer.getAccount().getId().toString())
+				.serviceOrg(Audience.ServiceOrg.builder()
+						.org(serviceOrgId)
+						.build())
 				.build();
 		DistributeVoucherRequest voucherRequest = DistributeVoucherRequest.builder()
 				.reqUser(mgrAccount.getId().toString())
@@ -165,11 +176,14 @@ public class DistributionController {
 								throw new ApiException(HttpStatus.NOT_FOUND, "customer.notFound");
 							Audience audience = Audience.builder()
 									.id(account.getId().toString())
+									.serviceOrg(Audience.ServiceOrg.builder()
+											.org(customer.getOrg().getId().toString())
+											.build())
 									.build();
-							audience.addFollowing(Following.builder()
-									.org(customer.getOrg().getId().toString())
-									.tags(customer.getTags())
-									.build());
+//							audience.addFollowing(Following.builder()
+//									.org(customer.getOrg().getId().toString())
+//									.tags(customer.getTags())
+//									.build());
 							audienceMap.putIfAbsent(account.getId(), audience);
 						}
 					}

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import io.chainmind.myriad.domain.common.Audience;
-import io.chainmind.myriad.domain.common.Audience.Following;
 import io.chainmind.myriad.domain.dto.distribution.BatchDistributionRequest;
 import io.chainmind.myriad.domain.dto.distribution.BatchDistributionResponse;
 import io.chainmind.myriadapi.client.VoucherClient;
@@ -82,13 +81,14 @@ public class DistributionServiceImpl implements DistributionService {
 			bdReq.setReqUser(event.getRequestEmployee().getAccount().getId().toString());
 			List<Audience> customers = new ArrayList<>();
 			custPage.forEach(c->{
-				// TODO: set following
-				customers.add(Audience.builder()
+				customers.add(
+					Audience.builder()
 						.id(c.getAccount().getId().toString())
-						.build().addFollowing(Following.builder()
+						.serviceOrg(Audience.ServiceOrg.builder()
 								.org(c.getOrg().getId().toString())
 								.tags(c.getTags())
-								.build()));
+								.build())
+						.build());
 			});
 			bdReq.setCustomers(customers);
 			try {

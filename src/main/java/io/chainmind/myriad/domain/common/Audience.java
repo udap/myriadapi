@@ -1,9 +1,5 @@
 package io.chainmind.myriad.domain.common;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import javax.validation.constraints.NotBlank;
 
 import lombok.AllArgsConstructor;
@@ -16,13 +12,13 @@ import lombok.NoArgsConstructor;
 public class Audience {
 	@NotBlank
 	private String id;
-	private List<Following> followings;
+	private ServiceOrg serviceOrg;
 	
 	@Getter
 	@AllArgsConstructor
 	@NoArgsConstructor
 	@Builder
-	public static class Following {
+	public static class ServiceOrg {
 		// organization id
 		@NotBlank
 		String org;
@@ -36,10 +32,10 @@ public class Audience {
 		String ranking;
 	}
 	
-	public Audience addFollowing(Following following) {
-		if (Objects.isNull(followings))
-			followings = new ArrayList<>();
-		followings.add(following);
-		return this;
-	}
+//	public Audience addFollowing(Following following) {
+//		if (Objects.isNull(followings))
+//			followings = new ArrayList<>();
+//		followings.add(following);
+//		return this;
+//	}
 }

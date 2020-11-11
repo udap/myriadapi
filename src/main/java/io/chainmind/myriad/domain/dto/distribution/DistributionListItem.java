@@ -19,6 +19,7 @@ public class DistributionListItem {
 	private String fromOwner;
 	// customer whom the voucher is distributed to
 	private String customerId;
+	private String customerOrgId;
 	// which channel is used to distribute the voucher
 	private String channel;
 	// distribution status
