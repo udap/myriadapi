@@ -27,8 +27,6 @@ public class BatchDistributionRequest {
 	private Channel channel = Channel.API;
 	// extra data
 	private Map<String, Object> metadata;
-
-	private Map<String,String>  departmentIds;
 	
 	@NotEmpty
 	private List<Audience> customers = new ArrayList<>();
