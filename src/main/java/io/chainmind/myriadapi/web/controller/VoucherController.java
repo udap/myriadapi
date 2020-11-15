@@ -105,25 +105,11 @@ public class VoucherController {
 		PageRequest pageRequest = PageRequest.of(page, size, CommonUtils.parseSort(sort));
 		log.debug("GET /api/vouchers: sorts: {}", pageRequest.getSort());
 		// query account id based on given ownerId and idType
-		String accountIds = null;
-		if (CodeType.MIXED.equals(idType)) {
-			List<String> accountIdList = new ArrayList<>();
-			// ownerId is in a mixed format like CELLPHONE:18621991234,SOURCE_ID:123,CELLPHONE:17600786111
-			List<Code> codes = CommonUtils.parseCodes(ownerId);
-			codes.forEach(mc->{
-				Account account = getOrCreateAccount(mc.getId(), mc.getType());	
-				if (account != null)
-					accountIdList.add(account.getId().toString());
-			});
-			// convert to comma-separated list
-			if (!accountIdList.isEmpty())
-				accountIds = StringUtils.collectionToCommaDelimitedString(accountIdList);
-		} else {
-			Account account = getOrCreateAccount(ownerId,idType);
-			if (account != null)
-				accountIds = account.getId().toString();
-		}	
-		
+		Code ownerCode = Code.builder()
+				.id(ownerId)
+				.type(idType)
+				.build();
+		String accountIds = getAccountIdsByCode(ownerCode);		
 		if (!StringUtils.hasText(accountIds))
 			// new account, return an empty list response
 			return emptyResponse();
@@ -157,6 +143,28 @@ public class VoucherController {
 		// excludes NEW vouchers
 		return voucherClient.queryVouchers(pageRequest, accountIds, null, null, 
 				merchantId, type, status, true, null);
+	}
+	
+	private String getAccountIdsByCode(Code code) {
+		String accountIds = null;
+		if (CodeType.MIXED.equals(code.getType())) {
+			List<String> accountIdList = new ArrayList<>();
+			// ownerId is in a mixed format like CELLPHONE:18621991234,SOURCE_ID:123,CELLPHONE:17600786111
+			List<Code> codes = CommonUtils.parseCodes(code.getId());
+			codes.forEach(mc->{
+				Account account = getOrCreateAccount(mc.getId(), mc.getType());	
+				if (account != null)
+					accountIdList.add(account.getId().toString());
+			});
+			// convert to comma-separated list
+			if (!accountIdList.isEmpty())
+				accountIds = StringUtils.collectionToCommaDelimitedString(accountIdList);
+		} else {
+			Account account = getOrCreateAccount(code.getId(),code.getType());
+			if (account != null)
+				accountIds = account.getId().toString();
+		}	
+		return accountIds;
 	}
 		
 	private Account getOrCreateAccount(String ownerId, CodeType idType) {
@@ -249,12 +257,16 @@ public class VoucherController {
         
     @PostMapping("/qualify")
     public List<VoucherListItem> queryQualifiedCoupons(@Valid @RequestBody QueryQualifiedCouponsRequest req) {
-    	Account account = accountService.findByCode(req.getCustomerCode().getId(), req.getCustomerCode().getType());
-    	if (account == null) {
-    		// create an account
-    		account = accountService.register(req.getCustomerCode().getId(), req.getCustomerCode().getType());
-    		return Collections.emptyList();
-    	}
+    	String accountIds = getAccountIdsByCode(req.getCustomerCode());
+//    	Account account = accountService.findByCode(req.getCustomerCode().getId(), req.getCustomerCode().getType());
+//    	if (account == null) {
+//    		// create an account
+//    		account = accountService.register(req.getCustomerCode().getId(), req.getCustomerCode().getType());
+//    		return Collections.emptyList();
+//    	}
+		if (!StringUtils.hasText(accountIds))
+			// new account, return an empty list response
+			return Collections.emptyList();
 
     	// TODO: query merchant and its ancestors
     	Organization merchant = organizationService.findByCode(req.getMerchantCode().getId(), req.getMerchantCode().getType());
@@ -269,7 +281,7 @@ public class VoucherController {
     		// query active vouchers excluding NEW vouchers (do not specify merchant id because rules may be 
         	// based on merchant tags rather than specific merchant)
 	    	PaginatedResponse<VoucherListItem> vouchers = voucherClient.queryVouchers(PageRequest.of(page++, 100), 
-	    			account.getId().toString(), null, null, null, 
+	    			accountIds, null, null, null, 
 	    			VoucherType.COUPON, UsageStatus.ACTIVE, true, null);
 	    	totalPages = vouchers.getTotal();
 	    	for (VoucherListItem v : vouchers.getEntries()) {

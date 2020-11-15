@@ -29,6 +29,7 @@ public class AccountServiceImpl implements AccountService {
 	@Cacheable(value = CacheConfiguration.ACCOUNT_BY_CODE_CACHE, unless="#result == null")
 	@Override
 	public Account findByCode(String code, CodeType codeType) {
+		String orgId = requestOrg.getAppOrg().getId().toString();
 		Account account = null;
 		if (CodeType.ID.equals(codeType)) {
 			Optional<Account> accountOpt = accountRepo.findById(Long.valueOf(code));
@@ -39,7 +40,7 @@ public class AccountServiceImpl implements AccountService {
 		} else if (CodeType.EMAIL.equals(codeType)){
 			account = accountRepo.findByEmail(code);
 		} else if (CodeType.SOURCE_ID.equals(codeType)) {
-			account = accountRepo.findByOrganizationIdAndSourceId(requestOrg.getId(),code);
+			account = accountRepo.findByOrganizationIdAndSourceId(orgId,code);
 		} else if (CodeType.NAME.equals(codeType)) {
 			account = accountRepo.findByName(code);
 		} else {
