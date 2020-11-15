@@ -1,15 +1,30 @@
 package io.chainmind.myriadapi.domain;
 
 public enum CodeType {
+	// common codes
 	MIXED,
 	ID, 
 	NAME,
+	// codes for account
 	CELLPHONE, 
 	EMAIL,
-	// external account id
-	SOURCE_ID,
+	SOURCE_ID, // external account id
+	// codes for organization 
 	LICENSE, 
 	UPCODE, // unionpay merchant code
 	WPCODE, // wechat pay merchant code
 	APCODE; // alipay merchant code
+	
+	/**
+	 * Returns an integer representing the meta type of the CodeType
+	 * @return 0 for common type, 1 for account code type, 2 for organization code type
+	 */
+	public int getMetaType() {
+		if (this.ordinal() > 5)
+			return 2;
+		else if (this.ordinal() > 2)
+			return 1;
+		else
+			return 0;
+	}
 }
