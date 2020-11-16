@@ -1,9 +1,9 @@
 package io.chainmind.myriadapi.service.impl;
 
 import java.util.Date;
-import java.util.Objects;
 import java.util.Optional;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
@@ -75,7 +75,7 @@ public class AccountServiceImpl implements AccountService {
 		
 		if (CodeType.SOURCE_ID.equals(codeType)) {
 			account.setSourceId(code);
-			account.setName(requestOrg.getAppOrg().getId().toString() + "-" + code);
+			account.setName(DigestUtils.sha1Hex(requestOrg.getAppOrg().getId().toString() + "-" + code));
 		}
 		// IMPORTANT
 		account.setOrganizationId(requestOrg.getAppOrg().getId().toString());
