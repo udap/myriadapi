@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.chainmind.myriad.domain.common.Audience;
+import io.chainmind.myriad.domain.common.Channel;
 import io.chainmind.myriad.domain.dto.distribution.BatchDistributionResponse;
 import io.chainmind.myriad.domain.dto.distribution.CollectVoucherRequest;
 import io.chainmind.myriad.domain.dto.distribution.DistributeVoucherRequest;
@@ -107,18 +108,18 @@ public class DistributionController {
 
 	@PostMapping("/collect")
 	public DistributeVoucherResponse create(@Valid @RequestBody ApiCollectVoucherRequest req){
-		Account customerAccount = accountService.findByCode(req.getCustomerId(), req.getCustomerIdType());
+		Account account = accountService.findByCode(req.getCustomer().getId(), req.getCustomer().getType());
 		//CampaignResponse campaign = campaignClient.findById(UUID.fromString(campaignId));
 		//  添加用户到活动创建机构，作为客户
 		//Organization org = orgService.find(Long.valueOf(campaign.getOwner()));
 		//组装请求数据
 		Audience audience = Audience.builder()
-				.id(customerAccount.getId().toString())
+				.id(account.getId().toString())
 				.build();
 		CollectVoucherRequest request = CollectVoucherRequest.builder()
 				.campaignId(req.getCampaignId())
 				.audience(audience)
-				.channel(req.getChannel().name())
+				.channel(Channel.API.name())
 				.metadata(req.getMetadata())
 				.build();
 		DistributeVoucherResponse response = voucherClient.create(request);
