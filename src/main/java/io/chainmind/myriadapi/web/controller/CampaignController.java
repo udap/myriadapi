@@ -1,5 +1,7 @@
 package io.chainmind.myriadapi.web.controller;
 
+import java.util.Objects;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -63,10 +65,16 @@ public class CampaignController {
     			throw new ApiException(HttpStatus.NOT_FOUND, "account.notFound");
     		participantId = account.getId().toString();
     	}
-    	// TODO: ensure party is in the management scope of the App Org
     	if (StringUtils.hasText(partyId)) {
-	    	partyId = orgService.findByCode(partyId, partyIdType).getId().toString();
+        	// ensure party is in the management scope of the App Org
+    		Organization party = orgService.findByCode(partyId, partyIdType);
+    		Organization topAncestor = orgService.findTopAncestor(party);
+    		if (!Objects.equals(requestUser.getAppOrg().getId(), topAncestor.getId()))
+    			throw new ApiException(HttpStatus.UNAUTHORIZED, "organization.illegalParty");
+	    	partyId = party.getId().toString();
+	    	
     	} else {
+    		// default party id
     		partyId = requestUser.getAppOrg().getId().toString();
     	}
     	
