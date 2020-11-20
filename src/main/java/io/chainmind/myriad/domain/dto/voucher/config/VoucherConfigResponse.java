@@ -2,6 +2,7 @@ package io.chainmind.myriad.domain.dto.voucher.config;
 
 import java.time.LocalDate;
 
+import io.chainmind.myriad.domain.common.Product;
 import io.chainmind.myriad.domain.common.VoucherType;
 import io.chainmind.myriad.domain.dto.IdResponse;
 import lombok.Getter;
@@ -32,7 +33,8 @@ public class VoucherConfigResponse extends IdResponse {
 
 	private DiscountResponse discount;// COUPON
 
-	private String productCode;// GIFT
+	// Gift
+	private Product product;
 
 	private Integer amount;// PREPAID_CARD
 	private CurrencyResponse currency;// PREPAID_CARD or LOYALTY_CARD
@@ -50,5 +52,7 @@ public class VoucherConfigResponse extends IdResponse {
 //	private Integer points; // Membership
 //	// balance points
 //	private Integer balance; // Membership
+
+
 
 }

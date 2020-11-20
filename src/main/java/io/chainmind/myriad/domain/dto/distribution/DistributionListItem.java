@@ -3,6 +3,7 @@ package io.chainmind.myriad.domain.dto.distribution;
 import java.time.LocalDateTime;
 
 import io.chainmind.myriad.domain.common.DistributionStatus;
+import io.chainmind.myriad.domain.common.Product;
 import io.chainmind.myriad.domain.dto.campaign.NamedCampaign;
 import io.chainmind.myriad.domain.dto.voucher.SimpleVoucherItem;
 import lombok.Getter;
@@ -33,10 +34,7 @@ public class DistributionListItem {
 	// discount off
 	private Integer discountOff;
 	// gift voucher
-	private String productName;
-	private String productCode;
-	private Integer productMarketPrice;
-	private Integer productExchangePrice;
+	private Product product; // GIFT
 
 
 }
