@@ -43,7 +43,7 @@ import io.chainmind.myriad.domain.dto.voucher.VoucherResponse;
 import io.chainmind.myriad.domain.dto.voucher.config.DiscountResponse;
 import io.chainmind.myriad.domain.dto.voucher.config.SimpleVoucherConfig;
 import io.chainmind.myriadapi.client.VoucherClient;
-import io.chainmind.myriadapi.domain.CodeType;
+import io.chainmind.myriadapi.domain.CodeName;
 import io.chainmind.myriadapi.domain.RequestUser;
 import io.chainmind.myriadapi.domain.dto.Code;
 import io.chainmind.myriadapi.domain.dto.OrgDTO;
@@ -98,16 +98,16 @@ public class VoucherController {
             @RequestParam(name="ownerId", required = true) String ownerId,
             @RequestParam(name="status", required = false) UsageStatus status,
             @RequestParam(name="merchantCode", required = false) String merchantCode,
-            @RequestParam(name="idType", required = false, defaultValue="ID") CodeType idType,
-            @RequestParam(name="codeType", required = false, defaultValue="ID") CodeType codeType,
+            @RequestParam(name="idType", required = false, defaultValue="ID") CodeName idType,
+            @RequestParam(name="codeType", required = false, defaultValue="ID") CodeName codeType,
             @RequestParam(name="type", required = false) VoucherType type) {
 		
 		PageRequest pageRequest = PageRequest.of(page, size, CommonUtils.parseSort(sort));
 		log.debug("GET /api/vouchers: sorts: {}", pageRequest.getSort());
 		// query account id based on given ownerId and idType
 		Code ownerCode = Code.builder()
-				.id(ownerId)
-				.type(idType)
+				.value(ownerId)
+				.name(idType)
 				.build();
 		String accountIds = getAccountIdsByCode(ownerCode);		
 		if (!StringUtils.hasText(accountIds))
@@ -147,12 +147,12 @@ public class VoucherController {
 	
 	private String getAccountIdsByCode(Code code) {
 		String accountIds = null;
-		if (CodeType.MIXED.equals(code.getType())) {
+		if (CodeName.MIXED.equals(code.getName())) {
 			List<String> accountIdList = new ArrayList<>();
 			// ownerId is in a mixed format like CELLPHONE:18621991234,SOURCE_ID:123,CELLPHONE:17600786111
-			List<Code> codes = CommonUtils.parseCodes(code.getId());
+			List<Code> codes = CommonUtils.parseMixedCode(code.getValue());
 			codes.forEach(mc->{
-				Account account = getOrCreateAccount(mc.getId(), mc.getType());	
+				Account account = getOrCreateAccount(mc.getValue(), mc.getName());	
 				if (account != null)
 					accountIdList.add(account.getId().toString());
 			});
@@ -160,19 +160,23 @@ public class VoucherController {
 			if (!accountIdList.isEmpty())
 				accountIds = StringUtils.collectionToCommaDelimitedString(accountIdList);
 		} else {
-			Account account = getOrCreateAccount(code.getId(),code.getType());
+			Account account = getOrCreateAccount(code.getValue(),code.getName());
 			if (account != null)
 				accountIds = account.getId().toString();
 		}	
 		return accountIds;
 	}
 		
-	private Account getOrCreateAccount(String ownerId, CodeType idType) {
-		Account account = accountService.findByCode(ownerId, idType);	
+	private Account getOrCreateAccount(String ownerId, CodeName idType) {
+		Code aCode = Code.builder()
+				.value(ownerId).name(idType)
+				.build();
+		aCode = CommonUtils.uniqueCode(requestUser.getAppOrg().getId().toString(), aCode);
+		Account account = accountService.findByCode(aCode.getValue(), aCode.getName());	
 		// try to register an account
 		if (account == null) {
 			// try to register an account
-			if(!CodeType.ID.equals(idType)) {
+			if(!CodeName.ID.equals(idType)) {
 				account = accountService.register(ownerId, idType);	
 			}
 			else {
@@ -269,7 +273,7 @@ public class VoucherController {
 			return Collections.emptyList();
 
     	// TODO: query merchant and its ancestors
-    	Organization merchant = organizationService.findByCode(req.getMerchantCode().getId(), req.getMerchantCode().getType());
+    	Organization merchant = organizationService.findByCode(req.getMerchantCode().getValue(), req.getMerchantCode().getName());
 		Organization topAncestor = organizationService.findTopAncestor(merchant);
 		boolean isTopAncestor = Objects.equals(topAncestor.getId(), merchant.getId());
     	    	
@@ -362,14 +366,16 @@ public class VoucherController {
     public DistributeVoucherResponse create(
             @RequestParam(name="campaignId", required = true) String campaignId,
             @RequestParam(name="customerId", required = true) String customerId,
-            @RequestParam(name="idType", required = false, defaultValue="ID") CodeType idType 
+            @RequestParam(name="idType", required = false, defaultValue="ID") CodeName idType 
     	) {
     	// find customer account
-		Account account = accountService.findByCode(customerId, idType);			
+    	Code aCode = CommonUtils.uniqueCode(requestUser.getAppOrg().getId().toString(), 
+    			Code.builder().value(customerId).name(idType).build());
+		Account account = accountService.findByCode(aCode.getValue(), aCode.getName());			
 		// try to register an account
 		if (account == null) {
 			// try to register an account
-			if(!CodeType.ID.equals(idType))
+			if(!CodeName.ID.equals(idType))
 				account = accountService.register(customerId, idType);	
 		}
 		if (account == null)

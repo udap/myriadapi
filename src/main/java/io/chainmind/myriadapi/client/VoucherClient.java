@@ -20,6 +20,7 @@ import io.chainmind.myriad.domain.common.PartyType;
 import io.chainmind.myriad.domain.common.VoucherType;
 import io.chainmind.myriad.domain.dto.PaginatedResponse;
 import io.chainmind.myriad.domain.dto.campaign.CampaignListItem;
+import io.chainmind.myriad.domain.dto.campaign.CampaignResponse;
 import io.chainmind.myriad.domain.dto.distribution.BatchDistributionRequest;
 import io.chainmind.myriad.domain.dto.distribution.BatchDistributionResponse;
 import io.chainmind.myriad.domain.dto.distribution.CollectVoucherRequest;
@@ -54,6 +55,9 @@ public interface VoucherClient {
             @RequestParam(required = false)String searchTxt);
 
 	
+    @GetMapping(value = "/campaigns/{id}")
+    public CampaignResponse getCampaign( @PathVariable(name = "id") String campaignId);
+    
 	@GetMapping(value = "/vouchers")
 	PaginatedResponse<VoucherListItem> queryVouchers(
             @PageableDefault(size = 20, sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable,

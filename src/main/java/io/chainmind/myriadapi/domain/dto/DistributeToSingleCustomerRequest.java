@@ -5,7 +5,7 @@ import java.util.Map;
 import javax.validation.constraints.NotBlank;
 
 import io.chainmind.myriad.domain.common.Channel;
-import io.chainmind.myriadapi.domain.CodeType;
+import io.chainmind.myriadapi.domain.CodeName;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -35,7 +35,7 @@ public class DistributeToSingleCustomerRequest {
 	// specify the organization that manages the customer
 	private String customerOrgId;
 	
-	private CodeType customerIdType = CodeType.ID;
+	private CodeName customerIdType = CodeName.ID;
 	
 	private Channel channel = Channel.API;
 	// extra data

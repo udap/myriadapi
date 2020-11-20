@@ -4,7 +4,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import io.chainmind.myriad.domain.common.RedemptionStatus;
-import io.chainmind.myriadapi.domain.CodeType;
+import io.chainmind.myriadapi.domain.CodeName;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,6 +20,6 @@ public class CompleteRedemptionRequest {
 	@NotNull
 	private RedemptionStatus status;
 	
-	private CodeType codeType = CodeType.ID;
+	private CodeName codeType = CodeName.ID;
 	
 }

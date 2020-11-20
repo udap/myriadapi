@@ -1,6 +1,6 @@
 package io.chainmind.myriadapi.service;
 
-import io.chainmind.myriadapi.domain.CodeType;
+import io.chainmind.myriadapi.domain.CodeName;
 import io.chainmind.myriadapi.domain.entity.Organization;
 
 public interface OrganizationService {
@@ -8,6 +8,7 @@ public interface OrganizationService {
 	
 	Organization findTopAncestor(Organization org);
 	
-	Organization findByCode(String code, CodeType codeType);
-
+	Organization findByCode(String code, CodeName codeType);
+	
+	Organization findDescendantByCode(Organization org, String code);
 }

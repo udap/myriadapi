@@ -3,13 +3,14 @@ package io.chainmind.myriadapi.utils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.chainmind.myriadapi.domain.CodeType;
+import io.chainmind.myriadapi.domain.CodeName;
 import io.chainmind.myriadapi.domain.dto.Code;
 
 public class CommonUtils {	
@@ -119,22 +120,41 @@ public class CommonUtils {
 		return Sort.by(orders);
 	}
 	
-	public static List<Code> parseCodes(String mixedCodes) {
-		if (!StringUtils.hasText(mixedCodes))
+	public static List<Code> parseMixedCode(String mixedCode) {
+		if (!StringUtils.hasText(mixedCode))
 			return Collections.emptyList();
 		List<Code> codes = new ArrayList<>();
-		StringUtils.commaDelimitedListToSet(mixedCodes).forEach(mc->{
+		StringUtils.commaDelimitedListToSet(mixedCode).forEach(mc->{
 			if (!mc.contains(":"))
-				codes.add(Code.builder().id(mc).type(CodeType.ID).build());
+				codes.add(Code.builder().value(mc).name(CodeName.ID).build());
 			else {
 				int index = mc.indexOf(':');
 				codes.add(Code.builder()
-						.id(mc.substring(index+1))
-						.type(CodeType.valueOf(mc.substring(0,index)))
+						.value(mc.substring(index+1))
+						.name(CodeName.valueOf(mc.substring(0,index)))
 						.build());		
 			}
 		});		
 		return codes;
+	}
+	
+	/**
+	 * Generate a unique code if needed
+	 * @param orgId the organization id that defines the scope
+	 * @param code the input code
+	 * @return an output code that is globally unique
+	 */
+	public static Code uniqueCode(String orgId, Code code) {
+		if (Objects.equals(CodeName.CODE,code.getName()) || Objects.equals(CodeName.SOURCE_ID, code.getName()))
+			return Code.builder()
+					.value(orgId+":"+code.getValue())
+					.name(code.getName())
+					.build();
+		return code;
+	}
+	
+	public static String[] parseCode(String code) {
+		return StringUtils.delimitedListToStringArray(code, ":");
 	}
 	
 }

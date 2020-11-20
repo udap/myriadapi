@@ -25,6 +25,8 @@ public class CampaignResponse extends IdResponse {
 	private LocalDate effective;
 	private LocalDate expiry;
 	// number of vouchers to be issued
+	private int plannedSupply;
+	// number of vouchers issued
 	private int totalSupply;
 	// allow or disallow additional issuance
 	private boolean autoUpdate;
@@ -33,6 +35,7 @@ public class CampaignResponse extends IdResponse {
 	private String status;
 	private Map<String, Object> metadata;
 	private String type;
+	private String subType;
 
 	// PROMOTION 的字段
 	private Set<TierResponse> tiers;

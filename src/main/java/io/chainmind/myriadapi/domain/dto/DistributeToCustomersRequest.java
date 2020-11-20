@@ -7,7 +7,7 @@ import java.util.Map;
 import javax.validation.constraints.NotBlank;
 
 import io.chainmind.myriad.domain.common.Channel;
-import io.chainmind.myriadapi.domain.CodeType;
+import io.chainmind.myriadapi.domain.CodeName;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -37,6 +37,6 @@ public class DistributeToCustomersRequest {
 	
 	private List<String> accounts = new ArrayList<String>();
 
-	private CodeType accountCodeType = CodeType.ID;
+	private CodeName accountCodeType = CodeName.ID;
 	
 }

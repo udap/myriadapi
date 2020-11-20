@@ -1,5 +1,6 @@
 package io.chainmind.myriad.domain.dto.voucher.config;
 
+import io.chainmind.myriad.domain.common.Product;
 import io.chainmind.myriad.domain.common.VoucherType;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,10 +24,6 @@ public class SimpleVoucherConfig {
 
 	private DiscountResponse discount;// COUPON
 
-	// GiftConfig
-	private String productName;
-	private String productCode;
-	private Integer productMarketPrice;
-	private Integer productExchangePrice;
+	private Product product; // GIFT
 
 }

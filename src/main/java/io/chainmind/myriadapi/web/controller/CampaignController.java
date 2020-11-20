@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,8 +18,9 @@ import io.chainmind.myriad.domain.common.ParticipantType;
 import io.chainmind.myriad.domain.common.PartyType;
 import io.chainmind.myriad.domain.dto.PaginatedResponse;
 import io.chainmind.myriad.domain.dto.campaign.CampaignListItem;
+import io.chainmind.myriad.domain.dto.campaign.CampaignResponse;
 import io.chainmind.myriadapi.client.VoucherClient;
-import io.chainmind.myriadapi.domain.CodeType;
+import io.chainmind.myriadapi.domain.CodeName;
 import io.chainmind.myriadapi.domain.RequestUser;
 import io.chainmind.myriadapi.domain.entity.Account;
 import io.chainmind.myriadapi.domain.entity.Organization;
@@ -41,48 +43,54 @@ public class CampaignController {
 	@Autowired
 	private RequestUser requestUser;
 	
+	/**
+	 * Query the campaigns related to the given query conditions
+	 * @param page
+	 * @param size
+	 * @param sort
+	 * @param hostId the id of the host organization, default to current registered organization
+	 * @param hostIdType the id type used to define the meaning of the hostId
+	 * @param participantId the id of the participant account who either creates the campaigns or participates in the campaigns
+	 * @param participantType the 
+	 * @param participantIdType
+	 * @param status
+	 * @param searchTxt
+	 * @return
+	 */
     @GetMapping
     public PaginatedResponse<CampaignListItem> listCampaigns(
             @RequestParam(name="page", required=false, defaultValue="0") int page,
             @RequestParam(name="size", required=false, defaultValue="20") int size,
             @RequestParam(name="sort", required=false, defaultValue="createdAt:desc") String sort,    		
-//            @PageableDefault(size = 20, direction = Sort.Direction.DESC) Pageable pageable,
-            @RequestParam(required = false) String partyId, // party id
-            @RequestParam(required = false, defaultValue="HOST") PartyType partyType,
-            @RequestParam(required = false, defaultValue="ID") CodeType partyIdType, 
-            @RequestParam(required = false) String participantId, // the account that participated in the campaign
-            @RequestParam(required = false, defaultValue="OWNER") ParticipantType participantType,
-            @RequestParam(required = false, defaultValue="ID") CodeType participantIdType,
-            @RequestParam(required = false) EffectiveStatus status,            
+            @RequestParam(required = false) String host, // the host organization id, default to the registered app org
+            @RequestParam(required = false) String createdBy, // the account id that created the campaigns
+            @RequestParam(required = false, defaultValue="ACTIVE") EffectiveStatus status,            
             @RequestParam(required = false)String searchTxt) {
 
     	PageRequest pageRequest = PageRequest.of(page, size, CommonUtils.parseSort(sort));
 		log.debug("GET /api/campaigns: sorts: {}", pageRequest.getSort());
-
-    	if (StringUtils.hasText(participantId)) {
-    		Account account = accountService.findByCode(participantId, participantIdType);
-    		if (account == null)
-    			throw new ApiException(HttpStatus.NOT_FOUND, "account.notFound");
-    		participantId = account.getId().toString();
-    	}
-    	if (StringUtils.hasText(partyId)) {
+		// validate the host party
+    	String hostParty = requestUser.getAppOrg().getId().toString();
+    	if (StringUtils.hasText(host)) {
         	// ensure party is in the management scope of the App Org
-    		Organization party = orgService.findByCode(partyId, partyIdType);
+    		Organization party = orgService.findByCode(host, CodeName.ID);
     		Organization topAncestor = orgService.findTopAncestor(party);
     		if (!Objects.equals(requestUser.getAppOrg().getId(), topAncestor.getId()))
-    			throw new ApiException(HttpStatus.UNAUTHORIZED, "organization.illegalParty");
-	    	partyId = party.getId().toString();
+    			throw new ApiException(HttpStatus.UNAUTHORIZED, "organization.unauthorized");
+    		hostParty = party.getId().toString();
 	    	
-    	} else {
-    		// default party id
-    		partyId = requestUser.getAppOrg().getId().toString();
+    	} 
+
+    	if (StringUtils.hasText(createdBy)) {
+    		Account account = accountService.findByCode(createdBy, CodeName.ID);
+    		if (account == null)
+    			throw new ApiException(HttpStatus.NOT_FOUND, "account.notFound");
+    		createdBy = account.getId().toString();
     	}
     	
-    	if (!StringUtils.hasText(participantId) && !StringUtils.hasText(partyId))
-    		throw new ApiException(HttpStatus.BAD_REQUEST, "campaign.missingParams");
-    	
-    	Page<CampaignListItem> aPage = voucherClient.listCampaigns(pageRequest, partyId, partyType, 
-    			participantId, participantType, status, searchTxt);
+    	// query campaigns
+    	Page<CampaignListItem> aPage = voucherClient.listCampaigns(pageRequest, hostParty, PartyType.HOST, 
+    			createdBy, ParticipantType.OWNER, status, searchTxt);
     
     	// convert to PaginatedResponse
     	PaginatedResponse<CampaignListItem> result = new PaginatedResponse<CampaignListItem>();
@@ -101,5 +109,21 @@ public class CampaignController {
     	} 
     	
     	return result;
+    }
+    
+    /**
+     * Query a campaign given its id. If the campaign is not in the scope of current app, a HTTP 403 error is returned
+     * @param campaignId campaign id
+     * @return a CampaignResponse or a HTTP 403 response
+     */
+    @GetMapping("/{id}")
+    public CampaignResponse getCampaign(@PathVariable(name="id")String campaignId) {
+    	CampaignResponse campaign = voucherClient.getCampaign(campaignId);
+    	// ensure campaign is in the scope of the app
+		Organization org = orgService.findById(Long.valueOf(campaign.getOwner()));
+		Organization topAncestor = orgService.findTopAncestor(org);
+		if (!Objects.equals(requestUser.getAppOrg().getId(), topAncestor.getId()))
+			throw new ApiException(HttpStatus.UNAUTHORIZED, "organization.unauthorized");
+    	return campaign;
     }
 }

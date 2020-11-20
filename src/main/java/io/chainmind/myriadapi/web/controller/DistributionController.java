@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.validation.Valid;
 
@@ -17,15 +18,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.chainmind.myriad.domain.common.Audience;
 import io.chainmind.myriad.domain.common.Channel;
+import io.chainmind.myriad.domain.dto.campaign.CampaignResponse;
 import io.chainmind.myriad.domain.dto.distribution.BatchDistributionResponse;
 import io.chainmind.myriad.domain.dto.distribution.CollectVoucherRequest;
 import io.chainmind.myriad.domain.dto.distribution.DistributeVoucherRequest;
 import io.chainmind.myriad.domain.dto.distribution.DistributeVoucherResponse;
 import io.chainmind.myriadapi.client.VoucherClient;
-import io.chainmind.myriadapi.domain.CodeType;
+import io.chainmind.myriadapi.domain.CodeName;
 import io.chainmind.myriadapi.domain.RequestUser;
 import io.chainmind.myriadapi.domain.dto.ApiCollectVoucherRequest;
 import io.chainmind.myriadapi.domain.dto.BatchStatus;
+import io.chainmind.myriadapi.domain.dto.Code;
 import io.chainmind.myriadapi.domain.dto.DistributeToCustomersRequest;
 import io.chainmind.myriadapi.domain.dto.DistributeToSingleCustomerRequest;
 import io.chainmind.myriadapi.domain.dto.DistributionMode;
@@ -40,6 +43,7 @@ import io.chainmind.myriadapi.service.AccountService;
 import io.chainmind.myriadapi.service.CustomerService;
 import io.chainmind.myriadapi.service.EmployeeService;
 import io.chainmind.myriadapi.service.OrganizationService;
+import io.chainmind.myriadapi.utils.CommonUtils;
 
 @RestController
 @RequestMapping("/api/distributions")
@@ -70,7 +74,9 @@ public class DistributionController {
 		if (!org.isActive())
 			throw new ApiException(HttpStatus.NOT_FOUND, "organization.notFound");
 		
-		Account mgrAccount = accountService.findByCode(req.getReqUser(), CodeType.ID);
+		// TODO: ensure organization is part of the app domain
+		
+		Account mgrAccount = accountService.findByCode(req.getReqUser(), CodeName.ID);
 		if (mgrAccount == null || !mgrAccount.isEnabled())
 			throw new ApiException(HttpStatus.NOT_FOUND, "account.notFound");
 		
@@ -106,12 +112,23 @@ public class DistributionController {
 		return voucherClient.distributeVoucher(voucherRequest);
 	}
 
+	/**
+	 * Distribute voucher to an account for a campaign
+	 * @param req 
+	 * @return
+	 */
 	@PostMapping("/collect")
 	public DistributeVoucherResponse create(@Valid @RequestBody ApiCollectVoucherRequest req){
-		Account account = accountService.findByCode(req.getCustomer().getId(), req.getCustomer().getType());
-		//CampaignResponse campaign = campaignClient.findById(UUID.fromString(campaignId));
-		//  添加用户到活动创建机构，作为客户
-		//Organization org = orgService.find(Long.valueOf(campaign.getOwner()));
+		Code aCode = CommonUtils.uniqueCode(requestUser.getAppOrg().getId().toString(), req.getCustomer());
+		Account account = accountService.findByCode(aCode.getValue(), aCode.getName());
+		
+		// ensure campaign is within the scope of the registered organization
+		CampaignResponse campaign = voucherClient.getCampaign(req.getCampaignId());
+		Organization org = orgService.findById(Long.valueOf(campaign.getOwner()));
+		Organization topAncestor = orgService.findTopAncestor(org);
+		if (!Objects.equals(requestUser.getAppOrg().getId(), topAncestor.getId()))
+			throw new ApiException(HttpStatus.UNAUTHORIZED, "organization.unauthorized");
+		
 		//组装请求数据
 		Audience audience = Audience.builder()
 				.id(account.getId().toString())
@@ -136,16 +153,16 @@ public class DistributionController {
 		Map<Long, Audience> audienceMap = new HashMap<Long,Audience>();
 		try {
 			// ensure a valid code type for customer
-			if (CodeType.CELLPHONE.equals(req.getAccountCodeType()) ||
-					CodeType.EMAIL.equals(req.getAccountCodeType()) ||
-					CodeType.ID.equals(req.getAccountCodeType())) {
+			if (CodeName.CELLPHONE.equals(req.getAccountCodeType()) ||
+					CodeName.EMAIL.equals(req.getAccountCodeType()) ||
+					CodeName.ID.equals(req.getAccountCodeType())) {
 			
 				// retrieve organization 
 				Organization org = orgService.findById(Long.valueOf(req.getReqOrg()));
 				if (!org.isActive())
 					throw new ApiException(HttpStatus.NOT_FOUND, "organization.notFound");
 				
-				Account mgrAccount = accountService.findByCode(req.getReqUser(), CodeType.ID);
+				Account mgrAccount = accountService.findByCode(req.getReqUser(), CodeName.ID);
 				if (mgrAccount == null || !mgrAccount.isEnabled())
 					throw new ApiException(HttpStatus.NOT_FOUND, "account.notFound");
 				

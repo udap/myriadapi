@@ -9,6 +9,10 @@ import io.chainmind.myriadapi.domain.entity.Organization;
 
 public interface OrganizationRepository
 		extends JpaRepository<Organization, Long>, JpaSpecificationExecutor<Organization> {
+	
+	@Query("SELECT d FROM OrganizationClosure c join c.descendant d " +
+			"WHERE c.ancestor = :org and d.code = :code and d.status != 'DELETED'  ")
+	Organization findDescendantByCode(@Param("org") Organization org,@Param("code")String code);
 
 	@Query("SELECT org  FROM Organization org WHERE org.licenseNo = :licenseNo AND org.status != 'DELETED' ")
 	Organization findByLicenseNo(@Param("licenseNo")String licenseNo);

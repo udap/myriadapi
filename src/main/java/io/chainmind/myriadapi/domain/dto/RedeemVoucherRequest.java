@@ -3,7 +3,7 @@ package io.chainmind.myriadapi.domain.dto;
 import javax.validation.constraints.NotBlank;
 
 import io.chainmind.myriad.domain.common.Order;
-import io.chainmind.myriadapi.domain.CodeType;
+import io.chainmind.myriadapi.domain.CodeName;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,6 +23,6 @@ public class RedeemVoucherRequest {
 	// the order that the voucher is redeemed against
 	private Order order;
 	
-	private CodeType idType = CodeType.ID;
-	private CodeType codeType = CodeType.ID;
+	private CodeName idType = CodeName.ID;
+	private CodeName codeType = CodeName.ID;
 }

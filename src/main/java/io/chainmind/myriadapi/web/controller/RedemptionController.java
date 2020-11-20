@@ -23,6 +23,7 @@ import io.chainmind.myriad.domain.dto.redemption.CreateRedemptionResponse;
 import io.chainmind.myriad.domain.dto.voucher.VoucherResponse;
 import io.chainmind.myriadapi.client.VoucherClient;
 import io.chainmind.myriadapi.domain.RequestUser;
+import io.chainmind.myriadapi.domain.dto.Code;
 import io.chainmind.myriadapi.domain.dto.CompleteRedemptionRequest;
 import io.chainmind.myriadapi.domain.dto.RedeemVoucherRequest;
 import io.chainmind.myriadapi.domain.entity.Account;
@@ -33,6 +34,7 @@ import io.chainmind.myriadapi.service.AccountService;
 import io.chainmind.myriadapi.service.AuthorizedMerchantService;
 import io.chainmind.myriadapi.service.OrganizationService;
 import io.chainmind.myriadapi.service.ValidationUtils;
+import io.chainmind.myriadapi.utils.CommonUtils;
 
 @RestController
 @RequestMapping("/api/redemptions")
@@ -57,7 +59,9 @@ public class RedemptionController {
 		redeemReq.setOrderId(req.getOrderId());
 		redeemReq.setVoucherId(req.getVoucherId());
 		// query account
-		Account account = accountService.findByCode(req.getReqUserId(), req.getIdType());
+		Code aCode = CommonUtils.uniqueCode(requestUser.getAppOrg().getId().toString(), 
+				Code.builder().value(req.getReqUserId()).name(req.getIdType()).build());
+		Account account = accountService.findByCode(aCode.getValue(), aCode.getName());
 		if (account == null)
 			throw new ApiException(HttpStatus.NOT_FOUND, "user.notFound");
 		redeemReq.setCustomerId(account.getId().toString());

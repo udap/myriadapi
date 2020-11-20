@@ -1,49 +1,24 @@
 package io.chainmind.myriadapi.domain.dto;
 
+import lombok.Builder;
+import lombok.Getter;
+
+@Getter
+@Builder
 public class CustomerResponse {
-    private String uid;
+	// account id
+	private String id;
+	// account name
     private String name;
-    private String coverImg;//BASE64-encoded image
+    // customer real name
+    private String realName;
+    // account cellpone
     private String cellphone;
+    // account email
+    private String email;
+    // account source id
+    private String sourceId;
+    
+    private String coverImg;//BASE64-encoded image
     private String tags;
-
-    public String getUid() {
-        return uid;
-    }
-
-    public void setUid(String uid) {
-        this.uid = uid;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getCoverImg() {
-        return coverImg;
-    }
-
-    public void setCoverImg(String coverImg) {
-        this.coverImg = coverImg;
-    }
-
-    public String getCellphone() {
-        return cellphone;
-    }
-
-    public void setCellphone(String cellphone) {
-        this.cellphone = cellphone;
-    }
-
-    public String getTags() {
-        return tags;
-    }
-
-    public void setTags(String tags) {
-        this.tags = tags;
-    }
 }
