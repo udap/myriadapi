@@ -1,5 +1,7 @@
 package io.chainmind.myriadapi.web.controller;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,22 +30,8 @@ public class OrganizationController {
 	@Autowired
 	private RequestUser requestUser;
 
-	/**
-	 * Query organization by code.
-	 * Caller can only query organizations that is either the registered organization (associated to the app id)
-	 * or a subsidiary of the registered organization
-	 * @param code a string in the format of name:value. see <code>CodeName</code> for name.
-	 */
-	@GetMapping
-	public OrgDTO findByCode(@RequestParam(name="code") String code) {
-		String[] parts = CommonUtils.parseCode(code);
-		if (parts.length != 2)
-			throw new ApiException(HttpStatus.BAD_REQUEST, "code.illegal");
-		Code oCode = Code.builder()
-				.value(parts[1])
-				.name(CodeName.valueOf(parts[0]))
-				.build();
-		oCode = CommonUtils.uniqueCode(requestUser.getAppOrg().getId().toString(), oCode);
+	private OrgDTO queryByCode(Code code) {
+		Code oCode = CommonUtils.uniqueCode(requestUser.getAppOrg().getId().toString(), code);
 		Organization org = orgService.findByCode(oCode.getValue(), oCode.getName());
 		if (Objects.isNull(org) || !org.isActive())
 			throw new ApiException(HttpStatus.NOT_FOUND, "organization.notFound");
@@ -60,10 +48,46 @@ public class OrganizationController {
 				.licenseNo(org.getLicenseNo())
 				.build();
 	}
+	/**
+	 * Query organizations by codes.
+	 * Caller can only query organizations that is either the registered organization (associated to the app id)
+	 * or a subsidiary of the registered organization
+	 * @param codes a comma separated name:value string.
+	 */
+	@GetMapping("/search")
+	public List<OrgDTO> findAllByCodes(@RequestParam(name="codes") String codes) {
+		List<Code> parsedCodes = CommonUtils.parseMixedCode(codes);
+		if (parsedCodes.isEmpty())
+			throw new ApiException(HttpStatus.BAD_REQUEST, "code.illegal");
+		List<OrgDTO> results = new ArrayList<OrgDTO>();
+		parsedCodes.forEach(oCode->results.add(queryByCode(oCode)));
+		return results;
+	}
+	
+	@GetMapping("/search/{code}")
+	public OrgDTO findByCode(@PathVariable String code) {
+		List<Code> parsedCodes = CommonUtils.parseMixedCode(code);
+		if (parsedCodes.size() != 1)
+			throw new ApiException(HttpStatus.BAD_REQUEST,"code.illegal");
+		return queryByCode(parsedCodes.get(0));
+	}
 	
 	@GetMapping("/{id}")
 	public OrgDTO findById(@PathVariable String id) {
-		return findByCode("ID:"+id);
+		Organization org = orgService.findById(Long.valueOf(id));
+		if (Objects.isNull(org) || !org.isActive())
+			throw new ApiException(HttpStatus.NOT_FOUND, "organization.notFound");
+		Organization topAncestor = orgService.findTopAncestor(org);
+		if (!Objects.equals(topAncestor.getId(), requestUser.getAppOrg().getId()))
+			throw new ApiException(HttpStatus.UNAUTHORIZED,"organization.unauthorized");
+		return OrgDTO.builder()
+				.id(org.getId().toString())
+				.name(org.getFullName())
+				.shortName(org.getName())
+				.phone(org.getPhone())
+				.address(org.getFullAddress())
+				.licenseNo(org.getLicenseNo())
+				.build();
 	}
 	
 	@GetMapping("/{id}/subsidiaries")

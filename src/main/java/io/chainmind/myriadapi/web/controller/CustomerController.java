@@ -1,5 +1,7 @@
 package io.chainmind.myriadapi.web.controller;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,26 +34,8 @@ public class CustomerController {
 	@Autowired
 	private RequestUser requestUser;
 	
-	@GetMapping("/{id}")
-	public CustomerResponse findById(@PathVariable String id) {
-		return findByCode("ID:"+id);
-	}
-	
-	/**
-	 * Query a customer by its code
-	 * @param code a string in the form of name:value pair. name is one of the <code>CodeName</code>
-	 * @return
-	 */
-	@GetMapping
-	public CustomerResponse findByCode(@RequestParam(name="code")String code) {
-		String[] parts = CommonUtils.parseCode(code);
-		if (parts.length != 2)
-			throw new ApiException(HttpStatus.BAD_REQUEST,"code.illegal");
-		Code aCode = Code.builder()
-				.name(CodeName.valueOf(parts[0]))
-				.value(parts[1])
-				.build();
-		aCode = CommonUtils.uniqueCode(requestUser.getAppOrg().getId().toString(), aCode);
+	private CustomerResponse queryByCode(Code code) {
+		Code aCode = CommonUtils.uniqueCode(requestUser.getAppOrg().getId().toString(), code);
 		Account account = accountService.findByCode(aCode.getValue(), aCode.getName());
 		Customer customer = customerService.findByAccountAndOrganization(account, requestUser.getAppOrg());
 		if (Objects.isNull(customer))
@@ -65,5 +49,47 @@ public class CustomerController {
 				.sourceId(account.getSourceId())
 				.tags(customer.getTags())
 				.build();	
+	}
+	
+	@GetMapping("/{id}")
+	public CustomerResponse findById(@PathVariable String id) {
+		Account account = accountService.findById(id);
+		if (Objects.isNull(account))
+			throw new ApiException(HttpStatus.NOT_FOUND,"account.notFound");
+		Customer customer = customerService.findByAccountAndOrganization(account, requestUser.getAppOrg());
+		if (Objects.isNull(customer))
+			throw new ApiException(HttpStatus.NOT_FOUND,"customer.notFound");
+		return CustomerResponse.builder()
+				.id(account.getId().toString())
+				.name(account.getName())
+				.realName(customer.getName())
+				.cellphone(account.getCellphone())
+				.email(account.getEmail())
+				.sourceId(account.getSourceId())
+				.tags(customer.getTags())
+				.build();	
+	}
+	
+	/**
+	 * Query customers by codes
+	 * @param code a comma separated name:value string. name is one of ID,CELLPHONE,EMAIL,SOURCE_ID.
+	 * @return
+	 */
+	@GetMapping("/search")
+	public List<CustomerResponse> findAllByCodes(@RequestParam(name="codes")String codes) {
+		List<Code> parsedCodes = CommonUtils.parseMixedCode(codes);
+		if (parsedCodes.isEmpty())
+			throw new ApiException(HttpStatus.BAD_REQUEST,"code.illegal");
+		List<CustomerResponse> results = new ArrayList<>();
+		parsedCodes.forEach(aCode->results.add(queryByCode(aCode)));
+		return results;
+	}
+	
+	@GetMapping("/search/{code}")
+	public CustomerResponse findByCode(@PathVariable String code) {
+		List<Code> parsedCodes = CommonUtils.parseMixedCode(code);
+		if (parsedCodes.size() != 1)
+			throw new ApiException(HttpStatus.BAD_REQUEST,"code.illegal");
+		return queryByCode(parsedCodes.get(0));
 	}
 }
