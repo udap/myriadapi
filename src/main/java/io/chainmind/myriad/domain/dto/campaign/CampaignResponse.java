@@ -20,22 +20,28 @@ public class CampaignResponse extends IdResponse {
 	private LocalDateTime createdBy;
 	private String owner;
 	private String name;
-	private String description;
-	private String category;
+	private String type;
+	private String subType;
 	private LocalDate effective;
 	private LocalDate expiry;
+	private String description;
+	private String url;
+	private String category;
 	// number of vouchers to be issued
 	private int plannedSupply;
 	// number of vouchers issued
 	private int totalSupply;
 	// allow or disallow additional issuance
 	private boolean autoUpdate;
-	private String url;
-	private Set<CampaignPartyResponse> parties;
+	// distribution method
+	private String distMethod;
+	// limit per account
+	private int distLimit;
 	private String status;
+	// additional metadata
 	private Map<String, Object> metadata;
-	private String type;
-	private String subType;
+
+	private Set<CampaignPartyResponse> parties;
 
 	// PROMOTION 的字段
 	private Set<TierResponse> tiers;

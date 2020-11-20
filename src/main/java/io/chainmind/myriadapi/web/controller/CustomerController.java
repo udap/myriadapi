@@ -34,29 +34,22 @@ public class CustomerController {
 	
 	@GetMapping("/{id}")
 	public CustomerResponse findById(@PathVariable String id) {
-		Account account = accountService.findById(id);
-		if (Objects.isNull(account))
-			throw new ApiException(HttpStatus.NOT_FOUND,"account.notFound");
-		Customer customer = customerService.findByAccountAndOrganization(account, requestUser.getAppOrg());
-		if (Objects.isNull(customer))
-			throw new ApiException(HttpStatus.NOT_FOUND,"customer.notFound");
-		return CustomerResponse.builder()
-				.id(id)
-				.name(account.getName())
-				.realName(customer.getName())
-				.cellphone(account.getCellphone())
-				.email(account.getEmail())
-				.sourceId(account.getSourceId())
-				.tags(customer.getTags())
-				.build();	
+		return findByCode("ID:"+id);
 	}
 	
+	/**
+	 * Query a customer by its code
+	 * @param code a string in the form of name:value pair. name is one of the <code>CodeName</code>
+	 * @return
+	 */
 	@GetMapping
-	public CustomerResponse findByCode(@RequestParam(name="codeValue")String codeValue,
-			@RequestParam(name="codeName",required=false,defaultValue="ID")CodeName codeName) {
+	public CustomerResponse findByCode(@RequestParam(name="code")String code) {
+		String[] parts = CommonUtils.parseCode(code);
+		if (parts.length != 2)
+			throw new ApiException(HttpStatus.BAD_REQUEST,"code.illegal");
 		Code aCode = Code.builder()
-				.name(codeName)
-				.value(codeValue)
+				.name(CodeName.valueOf(parts[0]))
+				.value(parts[1])
 				.build();
 		aCode = CommonUtils.uniqueCode(requestUser.getAppOrg().getId().toString(), aCode);
 		Account account = accountService.findByCode(aCode.getValue(), aCode.getName());

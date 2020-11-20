@@ -96,6 +96,7 @@ public class VoucherController {
             @RequestParam(name="size", required=false, defaultValue="20") int size,
             @RequestParam(name="sort", required=false, defaultValue="createdAt:desc") String sort,
             @RequestParam(name="ownerId", required = true) String ownerId,
+            @RequestParam(name="campaignId", required = false) String campaignId,
             @RequestParam(name="status", required = false) UsageStatus status,
             @RequestParam(name="merchantCode", required = false) String merchantCode,
             @RequestParam(name="idType", required = false, defaultValue="ID") CodeName idType,
@@ -141,7 +142,7 @@ public class VoucherController {
 		}
 		
 		// excludes NEW vouchers
-		return voucherClient.queryVouchers(pageRequest, accountIds, null, null, 
+		return voucherClient.queryVouchers(pageRequest, accountIds, campaignId, null, 
 				merchantId, type, status, true, null);
 	}
 	

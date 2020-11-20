@@ -32,11 +32,17 @@ public class OrganizationController {
 	 * Query organization by code.
 	 * Caller can only query organizations that is either the registered organization (associated to the app id)
 	 * or a subsidiary of the registered organization
+	 * @param code a string in the format of name:value. see <code>CodeName</code> for name.
 	 */
 	@GetMapping
-	public OrgDTO findByCode(@RequestParam(name="codeValue") String codeValue, 
-			 @RequestParam(name="codeName", required=false, defaultValue="ID") CodeName codeName) {
-		Code oCode = Code.builder().value(codeValue).name(codeName).build();
+	public OrgDTO findByCode(@RequestParam(name="code") String code) {
+		String[] parts = CommonUtils.parseCode(code);
+		if (parts.length != 2)
+			throw new ApiException(HttpStatus.BAD_REQUEST, "code.illegal");
+		Code oCode = Code.builder()
+				.value(parts[1])
+				.name(CodeName.valueOf(parts[0]))
+				.build();
 		oCode = CommonUtils.uniqueCode(requestUser.getAppOrg().getId().toString(), oCode);
 		Organization org = orgService.findByCode(oCode.getValue(), oCode.getName());
 		if (Objects.isNull(org) || !org.isActive())
@@ -53,6 +59,11 @@ public class OrganizationController {
 				.address(org.getFullAddress())
 				.licenseNo(org.getLicenseNo())
 				.build();
+	}
+	
+	@GetMapping("/{id}")
+	public OrgDTO findById(@PathVariable String id) {
+		return findByCode("ID:"+id);
 	}
 	
 	@GetMapping("/{id}/subsidiaries")
