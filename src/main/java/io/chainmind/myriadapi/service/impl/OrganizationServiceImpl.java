@@ -4,11 +4,8 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import io.chainmind.myriadapi.CacheConfiguration;
 import io.chainmind.myriadapi.domain.CodeName;
@@ -57,8 +54,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         		throw new ApiException(HttpStatus.BAD_REQUEST,"code.invalid");
         	Optional<Organization> orgOpt = orgRepo.findById(Long.valueOf(parts[0]));
         	if (!orgOpt.isPresent())
-        		throw new ApiException(HttpStatus.NOT_FOUND,"organization.notFound");
-        	organization = orgRepo.findDescendantByCode(orgOpt.get(), code);
+        		throw new ApiException(HttpStatus.NOT_FOUND,"organization.rootNotFound");
+        	organization = orgRepo.findDescendantByCode(orgOpt.get(), parts[1]);
     	} else if (codeType.equals(CodeName.LICENSE)) {
         	organization = orgRepo.findByLicenseNo(code);
         } else if (codeType.equals(CodeName.UPCODE)) {

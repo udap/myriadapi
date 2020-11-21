@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.chainmind.myriadapi.domain.CodeName;
 import io.chainmind.myriadapi.domain.RequestUser;
 import io.chainmind.myriadapi.domain.dto.Code;
 import io.chainmind.myriadapi.domain.dto.CustomerResponse;
@@ -85,9 +84,9 @@ public class CustomerController {
 		return results;
 	}
 	
-	@GetMapping("/search/{code}")
-	public CustomerResponse findByCode(@PathVariable String code) {
-		List<Code> parsedCodes = CommonUtils.parseMixedCode(code);
+	@GetMapping("/search/{name}/{value}")
+	public CustomerResponse findByCode(@PathVariable String name, @PathVariable String value) {
+		List<Code> parsedCodes = CommonUtils.parseMixedCode(name+":"+value);
 		if (parsedCodes.size() != 1)
 			throw new ApiException(HttpStatus.BAD_REQUEST,"code.illegal");
 		return queryByCode(parsedCodes.get(0));

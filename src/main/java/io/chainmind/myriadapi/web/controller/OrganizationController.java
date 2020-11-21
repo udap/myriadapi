@@ -33,8 +33,6 @@ public class OrganizationController {
 	private OrgDTO queryByCode(Code code) {
 		Code oCode = CommonUtils.uniqueCode(requestUser.getAppOrg().getId().toString(), code);
 		Organization org = orgService.findByCode(oCode.getValue(), oCode.getName());
-		if (Objects.isNull(org) || !org.isActive())
-			throw new ApiException(HttpStatus.NOT_FOUND, "organization.notFound");
 		// verify if the org is either the registered org or a subsidary of the registered org
 		Organization topAncestor = orgService.findTopAncestor(org);
 		if (!Objects.equals(topAncestor.getId(), requestUser.getAppOrg().getId()))
@@ -64,9 +62,9 @@ public class OrganizationController {
 		return results;
 	}
 	
-	@GetMapping("/search/{code}")
-	public OrgDTO findByCode(@PathVariable String code) {
-		List<Code> parsedCodes = CommonUtils.parseMixedCode(code);
+	@GetMapping("/search/{name}/{value}")
+	public OrgDTO findByCode(@PathVariable String name, @PathVariable String value) {
+		List<Code> parsedCodes = CommonUtils.parseMixedCode(name+":"+value);
 		if (parsedCodes.size() != 1)
 			throw new ApiException(HttpStatus.BAD_REQUEST,"code.illegal");
 		return queryByCode(parsedCodes.get(0));
