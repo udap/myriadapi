@@ -42,7 +42,7 @@ public class AccountServiceImpl implements AccountService {
 		} else if (CodeName.SOURCE_ID.equals(codeType)) {
 			String[] parts = CommonUtils.parseCode(code);
 			if (parts.length != 2)
-				throw new ApiException(HttpStatus.BAD_REQUEST, "code.invalidCode");
+				throw new ApiException(HttpStatus.BAD_REQUEST, "code.illegal");
 			account = accountRepo.findByOrganizationIdAndSourceId(parts[0],parts[1]);
 		} else if (CodeName.NAME.equals(codeType)) {
 			account = accountRepo.findByName(code);
@@ -56,7 +56,7 @@ public class AccountServiceImpl implements AccountService {
 	public Account register(String code, CodeName codeType) {
 		if (!CodeName.CELLPHONE.equals(codeType) && !CodeName.EMAIL.equals(codeType)
 				&& !CodeName.SOURCE_ID.equals(codeType))
-			throw new ApiException(HttpStatus.BAD_REQUEST, "非法的ID类型");
+			throw new ApiException(HttpStatus.BAD_REQUEST, "code.illegal");
 
 		Account account = new Account();
 		account.setCreateTime(new Date());
@@ -67,16 +67,12 @@ public class AccountServiceImpl implements AccountService {
 				throw new ApiException(HttpStatus.BAD_REQUEST, "registration.invalidPhoneNumber");
 			account.setCellphone(code);			
 			account.setName(code);
-		}
-		
-		if (CodeName.EMAIL.equals(codeType)) {
+		} else if (CodeName.EMAIL.equals(codeType)) {
 			if (!CommonUtils.validateEmail(code))
 				throw new ApiException(HttpStatus.BAD_REQUEST, "registration.invalidEmail");
 			account.setEmail(code);
 			account.setName(code);
-		}
-		
-		if (CodeName.SOURCE_ID.equals(codeType)) {
+		} else if (CodeName.SOURCE_ID.equals(codeType)) {
 			String[] parts = CommonUtils.parseCode(code);
 			if (parts.length != 2)
 				throw new ApiException(HttpStatus.BAD_REQUEST, "code.invalid");

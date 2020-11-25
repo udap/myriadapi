@@ -121,7 +121,8 @@ public class DistributionController {
 	public DistributeVoucherResponse create(@Valid @RequestBody ApiCollectVoucherRequest req){
 		Code aCode = CommonUtils.uniqueCode(requestUser.getAppOrg().getId().toString(), req.getAccountCode());
 		Account account = accountService.findByCode(aCode.getValue(), aCode.getName());
-		
+		if (Objects.isNull(account))
+			account = accountService.register(aCode.getValue(), aCode.getName());
 		// ensure campaign is within the scope of the registered organization
 		CampaignResponse campaign = voucherClient.getCampaign(req.getCampaignId());
 		Organization org = orgService.findById(Long.valueOf(campaign.getOwner()));
