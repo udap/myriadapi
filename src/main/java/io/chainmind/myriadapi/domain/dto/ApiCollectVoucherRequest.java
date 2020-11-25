@@ -3,6 +3,7 @@ package io.chainmind.myriadapi.domain.dto;
 import java.util.Map;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -13,7 +14,7 @@ public class ApiCollectVoucherRequest {
 	@NotBlank
 	private String campaignId;
 	
-	@NotBlank
+	@NotNull
 	private Code customer;
 	
 	// an optional voucher code
