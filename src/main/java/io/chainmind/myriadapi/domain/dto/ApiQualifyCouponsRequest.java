@@ -6,9 +6,9 @@ import io.chainmind.myriad.domain.common.Order;
 import lombok.Data;
 
 @Data
-public class QueryQualifiedCouponsRequest {
+public class ApiQualifyCouponsRequest {
 	@NotNull
-	private Code customerCode;
+	private Code accountCode;
 	@NotNull
 	private Code merchantCode;
 	

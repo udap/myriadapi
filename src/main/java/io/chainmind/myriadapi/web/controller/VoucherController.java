@@ -47,7 +47,7 @@ import io.chainmind.myriadapi.domain.CodeName;
 import io.chainmind.myriadapi.domain.RequestUser;
 import io.chainmind.myriadapi.domain.dto.Code;
 import io.chainmind.myriadapi.domain.dto.OrgDTO;
-import io.chainmind.myriadapi.domain.dto.QueryQualifiedCouponsRequest;
+import io.chainmind.myriadapi.domain.dto.ApiQualifyCouponsRequest;
 import io.chainmind.myriadapi.domain.dto.VoucherDetailsResponse;
 import io.chainmind.myriadapi.domain.entity.Account;
 import io.chainmind.myriadapi.domain.entity.AuthorizedMerchant;
@@ -261,8 +261,8 @@ public class VoucherController {
     }
         
     @PostMapping("/qualify")
-    public List<VoucherListItem> queryQualifiedCoupons(@Valid @RequestBody QueryQualifiedCouponsRequest req) {
-    	String accountIds = getAccountIdsByCode(req.getCustomerCode());
+    public List<VoucherListItem> queryQualifiedCoupons(@Valid @RequestBody ApiQualifyCouponsRequest req) {
+    	String accountIds = getAccountIdsByCode(req.getAccountCode());
 //    	Account account = accountService.findByCode(req.getCustomerCode().getId(), req.getCustomerCode().getType());
 //    	if (account == null) {
 //    		// create an account
@@ -274,7 +274,8 @@ public class VoucherController {
 			return Collections.emptyList();
 
     	// TODO: query merchant and its ancestors
-    	Organization merchant = organizationService.findByCode(req.getMerchantCode().getValue(), req.getMerchantCode().getName());
+    	Organization merchant = organizationService.findByCode(req.getMerchantCode().getValue(), 
+    			req.getMerchantCode().getName());
 		Organization topAncestor = organizationService.findTopAncestor(merchant);
 		boolean isTopAncestor = Objects.equals(topAncestor.getId(), merchant.getId());
     	    	
