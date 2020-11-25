@@ -34,7 +34,7 @@ import io.chainmind.myriad.domain.dto.distribution.DistributeVoucherResponse;
 import io.chainmind.myriad.domain.dto.voucher.BatchTransferRequest;
 import io.chainmind.myriad.domain.dto.voucher.BatchTransferResponse;
 import io.chainmind.myriad.domain.dto.voucher.QualifyVoucherRequest;
-import io.chainmind.myriad.domain.dto.voucher.QualifyVoucherResult;
+import io.chainmind.myriad.domain.dto.voucher.QualifyVoucherResponse;
 import io.chainmind.myriad.domain.dto.voucher.TransferVoucherRequest;
 import io.chainmind.myriad.domain.dto.voucher.TransferVoucherResponse;
 import io.chainmind.myriad.domain.dto.voucher.UsageStatus;
@@ -296,7 +296,7 @@ public class VoucherController {
 	    		AuthorizedMerchant amAncestor = (isTopAncestor)?am:merchantService.find(marketer, topAncestor);
 	    		Optional<Merchant> m = ValidationUtils.prepareMerchantFacts(merchant, topAncestor, am, amAncestor);
 	    		if (!m.isPresent()) continue;
-	    		QualifyVoucherResult result = voucherClient.qualifyVoucher(v.getId(), 
+	    		QualifyVoucherResponse result = voucherClient.qualifyVoucher(v.getId(), 
     				QualifyVoucherRequest.builder()
 	    				.merchant(m.get())
 	    				.order(req.getOrder())
