@@ -1,9 +1,9 @@
 package io.chainmind.myriadapi.domain.dto;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import io.chainmind.myriad.domain.common.Order;
-import io.chainmind.myriadapi.domain.CodeName;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,17 +12,11 @@ import lombok.Setter;
 public class RedeemVoucherRequest {
 	@NotBlank
 	private String voucherId;
-	@NotBlank
-	private String reqUserId;
-	@NotBlank
-	private String merchantCode;
-	@NotBlank
-	private String orderId;
-	// the issuer of the voucher to be redeemed
-	private String issuerId;
+	@NotNull
+	private Code accountCode;
+	@NotNull
+	private Code merchantCode;
 	// the order that the voucher is redeemed against
+	@NotNull
 	private Order order;
-	
-	private CodeName idType = CodeName.ID;
-	private CodeName codeType = CodeName.ID;
 }

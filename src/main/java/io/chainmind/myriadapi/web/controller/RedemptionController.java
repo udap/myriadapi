@@ -2,13 +2,13 @@ package io.chainmind.myriadapi.web.controller;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -56,30 +56,31 @@ public class RedemptionController {
 	@PostMapping
 	public CreateRedemptionResponse create(@Valid @RequestBody RedeemVoucherRequest req) {
 		CreateRedemptionRequest redeemReq = new CreateRedemptionRequest();
-		redeemReq.setOrderId(req.getOrderId());
+		redeemReq.setOrderId(req.getOrder().getId());
 		redeemReq.setVoucherId(req.getVoucherId());
 		// query account
-		Code aCode = CommonUtils.uniqueCode(requestUser.getAppOrg().getId().toString(), 
-				Code.builder().value(req.getReqUserId()).name(req.getIdType()).build());
+		Code aCode = CommonUtils.uniqueCode(requestUser.getAppOrg().getId().toString(), req.getAccountCode());
 		Account account = accountService.findByCode(aCode.getValue(), aCode.getName());
 		if (account == null)
 			throw new ApiException(HttpStatus.NOT_FOUND, "user.notFound");
 		redeemReq.setCustomerId(account.getId().toString());
 		redeemReq.setReqUser(redeemReq.getCustomerId());
 		// query merchant
-		Organization merchant = organizationService.findByCode(req.getMerchantCode(), req.getCodeType());
+		Organization merchant = organizationService.findByCode(req.getMerchantCode().getValue(), 
+				req.getMerchantCode().getName());
 		
-		String issuerId = req.getIssuerId();
-		if (!StringUtils.hasText(issuerId)) {
-			VoucherResponse voucher = redemptionClient.findVoucherById(req.getVoucherId());
-			issuerId = voucher.getIssuer();
+		VoucherResponse voucher = redemptionClient.findVoucherById(req.getVoucherId());
+		// do not allow a customer redeem a voucher owned by someone else
+		if (!Objects.equals(voucher.getOwner(),redeemReq.getCustomerId())) {
+			throw new ApiException(HttpStatus.UNAUTHORIZED,"voucher.unauthorized");
 		}
-		// find the marketer
-		Organization marketer = organizationService.findById(Long.valueOf(issuerId));
+	
+		// find the marketer that issued the voucher
+		Organization marketer = organizationService.findById(Long.valueOf(voucher.getIssuer()));
 		if (marketer == null)
 			throw new ApiException(HttpStatus.NOT_FOUND, "issuer.notFound");
 		
-		// validate the authorized merchant
+		// obtain the merchant is an authorized merchant of the marketer
 		AuthorizedMerchant am = merchantService.find(marketer, merchant);
 		
 		// find current merchant's top ancestor - we need this to support merchant chain
@@ -110,7 +111,8 @@ public class RedemptionController {
 		confirmReq.setVoucherId(req.getVoucherId());
 		confirmReq.setOrderId(req.getOrderId());
 		confirmReq.setStatus(req.getStatus());
-		Organization merchant = organizationService.findByCode(req.getMerchantCode(), req.getCodeType());
+		Organization merchant = organizationService.findByCode(req.getMerchantCode().getValue(), 
+				req.getMerchantCode().getName());
 		confirmReq.setMerchantId(merchant.getId().toString());
 		return redemptionClient.confirmRedemption(confirmReq);
 	}
