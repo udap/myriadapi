@@ -17,7 +17,7 @@ import lombok.Setter;
 public class CampaignResponse extends IdResponse {
 
 	private LocalDateTime updatedAt;
-	private LocalDateTime createdBy;
+	private String createdBy;
 	private String owner;
 	private String name;
 	private String type;
