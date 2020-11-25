@@ -119,7 +119,7 @@ public class DistributionController {
 	 */
 	@PostMapping("/collect")
 	public DistributeVoucherResponse create(@Valid @RequestBody ApiCollectVoucherRequest req){
-		Code aCode = CommonUtils.uniqueCode(requestUser.getAppOrg().getId().toString(), req.getCustomer());
+		Code aCode = CommonUtils.uniqueCode(requestUser.getAppOrg().getId().toString(), req.getAccountCode());
 		Account account = accountService.findByCode(aCode.getValue(), aCode.getName());
 		
 		// ensure campaign is within the scope of the registered organization

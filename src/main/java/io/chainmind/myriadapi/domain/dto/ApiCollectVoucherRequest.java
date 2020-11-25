@@ -15,7 +15,7 @@ public class ApiCollectVoucherRequest {
 	private String campaignId;
 	
 	@NotNull
-	private Code customer;
+	private Code accountCode;
 	
 	// an optional voucher code
 	private String voucherCode;
