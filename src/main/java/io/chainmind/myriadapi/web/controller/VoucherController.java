@@ -23,14 +23,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.chainmind.myriad.domain.common.Audience;
 import io.chainmind.myriad.domain.common.DiscountType;
 import io.chainmind.myriad.domain.common.Merchant;
 import io.chainmind.myriad.domain.common.Order;
 import io.chainmind.myriad.domain.common.VoucherType;
 import io.chainmind.myriad.domain.dto.PaginatedResponse;
-import io.chainmind.myriad.domain.dto.distribution.CollectVoucherRequest;
-import io.chainmind.myriad.domain.dto.distribution.DistributeVoucherResponse;
 import io.chainmind.myriad.domain.dto.voucher.BatchTransferRequest;
 import io.chainmind.myriad.domain.dto.voucher.BatchTransferResponse;
 import io.chainmind.myriad.domain.dto.voucher.QualifyVoucherRequest;
@@ -45,9 +42,9 @@ import io.chainmind.myriad.domain.dto.voucher.config.SimpleVoucherConfig;
 import io.chainmind.myriadapi.client.VoucherClient;
 import io.chainmind.myriadapi.domain.CodeName;
 import io.chainmind.myriadapi.domain.RequestUser;
+import io.chainmind.myriadapi.domain.dto.ApiQualifyCouponsRequest;
 import io.chainmind.myriadapi.domain.dto.Code;
 import io.chainmind.myriadapi.domain.dto.OrgDTO;
-import io.chainmind.myriadapi.domain.dto.ApiQualifyCouponsRequest;
 import io.chainmind.myriadapi.domain.dto.VoucherDetailsResponse;
 import io.chainmind.myriadapi.domain.entity.Account;
 import io.chainmind.myriadapi.domain.entity.AuthorizedMerchant;
@@ -104,7 +101,7 @@ public class VoucherController {
             @RequestParam(name="type", required = false) VoucherType type) {
 		
 		PageRequest pageRequest = PageRequest.of(page, size, CommonUtils.parseSort(sort));
-		log.debug("GET /api/vouchers: sorts: {}", pageRequest.getSort());
+		log.debug("GET /api/vouchers: sorts: {}, ownerId:{}", pageRequest.getSort(), ownerId);
 		// query account id based on given ownerId and idType
 		Code ownerCode = Code.builder()
 				.value(ownerId)
@@ -178,7 +175,7 @@ public class VoucherController {
 		if (account == null) {
 			// try to register an account
 			if(!CodeName.ID.equals(idType)) {
-				account = accountService.register(ownerId, idType);	
+				account = accountService.register(aCode.getValue(), aCode.getName());	
 			}
 			else {
 				log.warn("query account by id {} returned null", ownerId);
@@ -198,9 +195,8 @@ public class VoucherController {
 	
     @GetMapping("/{id}")
 	public VoucherDetailsResponse getVoucherById(@PathVariable(name = "id") String voucherId) {
-    	log.debug("getVoucherById: " + voucherId);
     	VoucherResponse voucher = voucherClient.findVoucherById(voucherId);
-    	log.debug("response: " + voucher.getId());
+    	log.debug("findVoucherById: " + voucher.getId());
     	
     	// TODO: disallow query if voucher's issuer is not the appOrg or is not a subsidiary of current appOrg
     	
@@ -357,43 +353,43 @@ public class VoucherController {
     	return 0;
     }
 
-    /**
-     * Customer collects a voucher
-     * @param campaignId the campaign where the voucher is collected from
-     * @param customerId identifier of the customer who collects a voucher
-     * @param idType customer id type, e.g. ID, CELLPHONE, EMAIL or SOURCE_ID
-     * @return
-     */
-    @GetMapping("/collect")
-    public DistributeVoucherResponse create(
-            @RequestParam(name="campaignId", required = true) String campaignId,
-            @RequestParam(name="customerId", required = true) String customerId,
-            @RequestParam(name="idType", required = false, defaultValue="ID") CodeName idType 
-    	) {
-    	// find customer account
-    	Code aCode = CommonUtils.uniqueCode(requestUser.getAppOrg().getId().toString(), 
-    			Code.builder().value(customerId).name(idType).build());
-		Account account = accountService.findByCode(aCode.getValue(), aCode.getName());			
-		// try to register an account
-		if (account == null) {
-			// try to register an account
-			if(!CodeName.ID.equals(idType))
-				account = accountService.register(customerId, idType);	
-		}
-		if (account == null)
-			throw new ApiException(HttpStatus.NOT_FOUND,"account.notFound");
-		log.debug("Customer {} with account id {}", customerId, account.getId());
-		// create an audience object
-    	Audience audience = Audience.builder()
-    			.id(account.getId().toString())
-    			.build();
-    	CollectVoucherRequest req = CollectVoucherRequest.builder()
-    			.campaignId(campaignId)
-    			.channel(requestUser.getAppId()) // app
-    			.audience(audience)
-    			.build();
-    	log.debug("send request to voucher services...");
-    	return voucherClient.create(req);
-    }
+//    /**
+//     * Customer collects a voucher
+//     * @param campaignId the campaign where the voucher is collected from
+//     * @param customerId identifier of the customer who collects a voucher
+//     * @param idType customer id type, e.g. ID, CELLPHONE, EMAIL or SOURCE_ID
+//     * @return
+//     */
+//    @GetMapping("/collect")
+//    public DistributeVoucherResponse create(
+//            @RequestParam(name="campaignId", required = true) String campaignId,
+//            @RequestParam(name="customerId", required = true) String customerId,
+//            @RequestParam(name="idType", required = false, defaultValue="ID") CodeName idType 
+//    	) {
+//    	// find customer account
+//    	Code aCode = CommonUtils.uniqueCode(requestUser.getAppOrg().getId().toString(), 
+//    			Code.builder().value(customerId).name(idType).build());
+//		Account account = accountService.findByCode(aCode.getValue(), aCode.getName());			
+//		// try to register an account
+//		if (account == null) {
+//			// try to register an account
+//			if(!CodeName.ID.equals(idType))
+//				account = accountService.register(customerId, idType);	
+//		}
+//		if (account == null)
+//			throw new ApiException(HttpStatus.NOT_FOUND,"account.notFound");
+//		log.debug("Customer {} with account id {}", customerId, account.getId());
+//		// create an audience object
+//    	Audience audience = Audience.builder()
+//    			.id(account.getId().toString())
+//    			.build();
+//    	CollectVoucherRequest req = CollectVoucherRequest.builder()
+//    			.campaignId(campaignId)
+//    			.channel(requestUser.getAppId()) // app
+//    			.audience(audience)
+//    			.build();
+//    	log.debug("send request to voucher services...");
+//    	return voucherClient.create(req);
+//    }
 
 }

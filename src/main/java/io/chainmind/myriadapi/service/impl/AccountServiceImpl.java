@@ -17,7 +17,9 @@ import io.chainmind.myriadapi.domain.exception.ApiException;
 import io.chainmind.myriadapi.persistence.repository.AccountRepository;
 import io.chainmind.myriadapi.service.AccountService;
 import io.chainmind.myriadapi.utils.CommonUtils;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class AccountServiceImpl implements AccountService {
 
@@ -41,13 +43,15 @@ public class AccountServiceImpl implements AccountService {
 			account = accountRepo.findByEmail(code);
 		} else if (CodeName.SOURCE_ID.equals(codeType)) {
 			String[] parts = CommonUtils.parseCode(code);
-			if (parts.length != 2)
-				throw new ApiException(HttpStatus.BAD_REQUEST, "code.illegal");
+			if (parts.length != 2) {
+				log.error("invalid source code: {}", code);
+				throw new ApiException(HttpStatus.BAD_REQUEST, "account.invalidCode");
+			}
 			account = accountRepo.findByOrganizationIdAndSourceId(parts[0],parts[1]);
 		} else if (CodeName.NAME.equals(codeType)) {
 			account = accountRepo.findByName(code);
 		} else {
-			throw new ApiException(HttpStatus.BAD_REQUEST, "account.invalidCodeType");
+			throw new ApiException(HttpStatus.BAD_REQUEST, "account.unsupportedCodeType");
 		}
 		return account;
 	}
@@ -55,8 +59,10 @@ public class AccountServiceImpl implements AccountService {
 	@Override
 	public Account register(String code, CodeName codeType) {
 		if (!CodeName.CELLPHONE.equals(codeType) && !CodeName.EMAIL.equals(codeType)
-				&& !CodeName.SOURCE_ID.equals(codeType))
-			throw new ApiException(HttpStatus.BAD_REQUEST, "code.illegal");
+				&& !CodeName.SOURCE_ID.equals(codeType)) {
+			log.error("code type {} cannot be used for registration", codeType);
+			throw new ApiException(HttpStatus.BAD_REQUEST, "registration.unsupportedCodeType");
+		}
 
 		Account account = new Account();
 		account.setCreateTime(new Date());
@@ -74,10 +80,12 @@ public class AccountServiceImpl implements AccountService {
 			account.setName(code);
 		} else if (CodeName.SOURCE_ID.equals(codeType)) {
 			String[] parts = CommonUtils.parseCode(code);
-			if (parts.length != 2)
-				throw new ApiException(HttpStatus.BAD_REQUEST, "code.invalid");
+			if (parts.length != 2) {
+				log.error("invalid source code for registration: {}", code);
+				throw new ApiException(HttpStatus.BAD_REQUEST, "registration.invalidCode");
+			}
 			account.setSourceId(parts[1]);
-			account.setName(DigestUtils.sha1Hex(parts[0] + "-" + parts[1]));
+			account.setName(DigestUtils.sha1Hex(code));
 		}
 		// IMPORTANT
 		account.setOrganizationId(requestOrg.getAppOrg().getId().toString());
