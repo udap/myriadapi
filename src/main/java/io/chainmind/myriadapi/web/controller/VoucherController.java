@@ -121,7 +121,9 @@ public class VoucherController {
 		String merchantId = null;
 		if (StringUtils.hasText(merchantCode)) {
 			try {
-				Organization merchant = organizationService.findByCode(merchantCode, codeType);
+				Code mCode = CommonUtils.uniqueCode(requestUser.getAppOrg().getId().toString(), 
+						Code.builder().name(codeType).value(merchantCode).build());
+				Organization merchant = organizationService.findByCode(mCode.getValue(), mCode.getName());
 				merchantId = merchant.getId().toString();
 				// this is a quick hack to allow returning top ancestor's vouchers
 				Organization topAncestor = organizationService.findTopAncestor(merchant);
@@ -270,8 +272,8 @@ public class VoucherController {
 			return Collections.emptyList();
 
     	// TODO: query merchant and its ancestors
-    	Organization merchant = organizationService.findByCode(req.getMerchantCode().getValue(), 
-    			req.getMerchantCode().getName());
+		Code mCode = CommonUtils.uniqueCode(requestUser.getAppOrg().getId().toString(), req.getMerchantCode());
+    	Organization merchant = organizationService.findByCode(mCode.getValue(), mCode.getName());
 		Organization topAncestor = organizationService.findTopAncestor(merchant);
 		boolean isTopAncestor = Objects.equals(topAncestor.getId(), merchant.getId());
     	    	

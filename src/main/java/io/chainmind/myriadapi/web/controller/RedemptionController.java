@@ -66,8 +66,8 @@ public class RedemptionController {
 		redeemReq.setCustomerId(account.getId().toString());
 		redeemReq.setReqUser(redeemReq.getCustomerId());
 		// query merchant
-		Organization merchant = organizationService.findByCode(req.getMerchantCode().getValue(), 
-				req.getMerchantCode().getName());
+		Code mCode = CommonUtils.uniqueCode(requestUser.getAppOrg().getId().toString(), req.getMerchantCode());
+		Organization merchant = organizationService.findByCode(mCode.getValue(),mCode.getName()); 
 		
 		VoucherResponse voucher = redemptionClient.findVoucherById(req.getVoucherId());
 		// do not allow a customer redeem a voucher owned by someone else
@@ -111,8 +111,9 @@ public class RedemptionController {
 		confirmReq.setVoucherId(req.getVoucherId());
 		confirmReq.setOrderId(req.getOrderId());
 		confirmReq.setStatus(req.getStatus());
-		Organization merchant = organizationService.findByCode(req.getMerchantCode().getValue(), 
-				req.getMerchantCode().getName());
+		// re-create the merchant code to support CodeName.Code type
+		Code mCode = CommonUtils.uniqueCode(requestUser.getAppOrg().getId().toString(), req.getMerchantCode());
+		Organization merchant = organizationService.findByCode(mCode.getValue(), mCode.getName());
 		confirmReq.setMerchantId(merchant.getId().toString());
 		return redemptionClient.confirmRedemption(confirmReq);
 	}
