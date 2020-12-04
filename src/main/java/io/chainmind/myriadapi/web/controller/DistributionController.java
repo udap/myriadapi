@@ -130,9 +130,18 @@ public class DistributionController {
 		if (!Objects.equals(requestUser.getAppOrg().getId(), topAncestor.getId()))
 			throw new ApiException(HttpStatus.UNAUTHORIZED, "organization.unauthorized");
 		
+		// query the optional service org
+		Organization sOrg = null;
+		if (Objects.nonNull(req.getOrgCode())) {
+			Code oCode = CommonUtils.uniqueCode(requestUser.getAppOrg().getId().toString(), req.getOrgCode());
+			sOrg = orgService.findByCode(oCode.getValue(),oCode.getName());
+		}
+		
 		//组装请求数据
 		Audience audience = Audience.builder()
 				.id(account.getId().toString())
+				.serviceOrg(Objects.nonNull(sOrg)?Audience.ServiceOrg.builder()
+						.org(sOrg.getId().toString()).build():null)
 				.build();
 		CollectVoucherRequest request = CollectVoucherRequest.builder()
 				.campaignId(req.getCampaignId())

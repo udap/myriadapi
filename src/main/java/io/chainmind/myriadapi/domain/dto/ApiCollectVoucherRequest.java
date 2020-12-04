@@ -17,6 +17,9 @@ public class ApiCollectVoucherRequest {
 	@NotNull
 	private Code accountCode;
 	
+	// an optional code of the organization that manages the customer
+	private Code orgCode;
+	
 	// an optional voucher code
 	private String voucherCode;
 
