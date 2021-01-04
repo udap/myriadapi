@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.chainmind</groupId>
     <artifactId>myriadapi</artifactId>
-    <version>0.6.7</version>
+    <version>0.7</version>
     <name>myriadapi</name>
     <description>Myriad API</description>
 
