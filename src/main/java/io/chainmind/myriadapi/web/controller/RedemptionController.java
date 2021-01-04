@@ -89,7 +89,12 @@ public class RedemptionController {
 		// the merchant may not be in the authorized merchant list but its ancestor could be
 		AuthorizedMerchant amAncestor = merchantService.find(marketer, topAncestor);
 		
-		Optional<Merchant> m = ValidationUtils.prepareMerchantFacts(merchant, topAncestor, am, amAncestor);
+		// check if the merchant or its ancestor is an authorized merchant of any of the descendants of the marketer
+		boolean existsInDescendants = merchantService.existsInDescendant(marketer, merchant)
+				|| merchantService.existsInDescendant(marketer, topAncestor);
+		
+		Optional<Merchant> m = ValidationUtils.prepareMerchantFacts(merchant, topAncestor, 
+				am, amAncestor, existsInDescendants);
 		if (!m.isPresent())
 			throw new ApiException(HttpStatus.FORBIDDEN, "merchant.notAuthorized");
 		

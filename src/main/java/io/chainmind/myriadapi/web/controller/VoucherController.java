@@ -292,7 +292,9 @@ public class VoucherController {
 				Organization marketer = organizationService.findById(Long.valueOf(v.getIssuer()));
 	    		AuthorizedMerchant am = merchantService.find(marketer, merchant);
 	    		AuthorizedMerchant amAncestor = (isTopAncestor)?am:merchantService.find(marketer, topAncestor);
-	    		Optional<Merchant> m = ValidationUtils.prepareMerchantFacts(merchant, topAncestor, am, amAncestor);
+	    		boolean existsInDescendants = merchantService.existsInDescendant(marketer, merchant)
+	    				|| merchantService.existsInDescendant(marketer, topAncestor);
+	    		Optional<Merchant> m = ValidationUtils.prepareMerchantFacts(merchant, topAncestor, am, amAncestor, existsInDescendants);
 	    		if (!m.isPresent()) continue;
 	    		QualifyVoucherResponse result = voucherClient.qualifyVoucher(v.getId(), 
     				QualifyVoucherRequest.builder()

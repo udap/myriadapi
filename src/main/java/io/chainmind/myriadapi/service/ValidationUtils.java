@@ -17,11 +17,11 @@ public class ValidationUtils {
 	 * @return
 	 */
 	public static Optional<Merchant> prepareMerchantFacts(Organization merchant, Organization ancestor,
-			AuthorizedMerchant am, AuthorizedMerchant amAncestor) {
+			AuthorizedMerchant am, AuthorizedMerchant amAncestor, boolean existsInDescendants) {
 		// ensure merchant and its ancestor cannot be null
 		assert(merchant != null && ancestor != null);
 		// neither merchant nor its top ancestor is authorized 
-		if (Objects.isNull(am) && Objects.isNull(amAncestor))
+		if (Objects.isNull(am) && Objects.isNull(amAncestor) && !existsInDescendants)
 			return Optional.empty();
 
 		Merchant mAncestor = null;
@@ -29,13 +29,17 @@ public class ValidationUtils {
 			mAncestor = Merchant.builder()
 				.id(ancestor.getId().toString())
 				.build();
-		
+		String tags = null;
+		if (Objects.nonNull(am))
+			tags = am.getTags();
+		else if (Objects.nonNull(mAncestor))
+			tags = am.getTags();
 		return Optional.of(Merchant.builder()
 				.id(merchant.getId().toString())
 				.province(merchant.getProvince())
 				.city(merchant.getCity())
 				.district(merchant.getDistrict())
-				.tags((am!=null)?am.getTags():mAncestor.getTags())
+				.tags(tags)
 				.topAncestor(mAncestor)
 				.build());
 	

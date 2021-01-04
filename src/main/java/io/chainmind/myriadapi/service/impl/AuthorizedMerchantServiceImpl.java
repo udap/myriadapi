@@ -18,4 +18,9 @@ public class AuthorizedMerchantServiceImpl implements AuthorizedMerchantService 
 		return merchantRepo.findByOrgAndMerchant(marketer, merchant);
 	}
 
+	@Override
+	public boolean existsInDescendant(Organization marketer, Organization merchant) {
+		return merchantRepo.countInDescendants(marketer, merchant) > 0;
+	}
+
 }
