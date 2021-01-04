@@ -33,7 +33,7 @@ public class ValidationUtils {
 		if (Objects.nonNull(am))
 			tags = am.getTags();
 		else if (Objects.nonNull(mAncestor))
-			tags = am.getTags();
+			tags = mAncestor.getTags();
 		return Optional.of(Merchant.builder()
 				.id(merchant.getId().toString())
 				.province(merchant.getProvince())
