@@ -22,7 +22,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Autowired
 	private OrganizationRepository orgRepo;
 	
-	@Cacheable(value = CacheConfiguration.ORGANIZATION_CACHE, unless="#result == null")
+	@Cacheable(value = CacheConfiguration.ORGANIZATION_BY_ID_CACHE, unless="#result == null")
 	@Override
 	public Organization findById(Long id) {
 		Optional<Organization> orgOpt = orgRepo.findById(id);

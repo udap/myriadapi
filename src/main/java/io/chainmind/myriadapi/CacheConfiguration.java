@@ -17,8 +17,8 @@ public class CacheConfiguration {
 	public static final String ACCOUNT_BY_CODE_CACHE = "myriad.accounts.code";
 	public static final String ACCOUNT_CACHE = "myriad.accounts";
 	public static final String GROUP_CACHE = "myriad.groups";
-	public static final String ORGANIZATION_CACHE = "myriad.organizations";
-	public static final String ORGANIZATION_BY_ID_CACHE = "myriad.organizations.id";
+//	public static final String ORGANIZATION_CACHE = "myriad.organizations";
+	public static final String ORGANIZATION_BY_ID_CACHE = "organizations.id";
 	public static final String ORGANIZATION_CACHE_BY_CODE = "myriad.organizations.code";
 	public static final String ORGANIZATION_ANCESTOR_CACHE = "myriad.organization.ancestor";
 	public static final String CUSTOMER_BY_ACCT_ORG_CACHE = "myriad.customers.acct-org";
