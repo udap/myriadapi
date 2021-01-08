@@ -16,7 +16,7 @@ public class CreateVoucherCampaignRequest extends CreateCampaignRequest {
 	}
 
 	@Positive
-	private int totalSupply;
+	private int plannedSupply;
 
 	private boolean autoUpdate;
 
