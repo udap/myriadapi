@@ -100,10 +100,12 @@ public class RedemptionController {
 		
 		// set merchant
 		redeemReq.setMerchant(m.get());
-		// set order
+		// set order and payment
 		if (req.getOrder() != null) {
 			Map<String, Object> metadata = new HashMap<>();
 			metadata.put("order", req.getOrder());
+			if (req.getPaymentMethod() != null)
+				metadata.put("payment", req.getPaymentMethod());
 			redeemReq.setMetadata(metadata);
 		}
 		requestUser.setId(redeemReq.getReqUser());
