@@ -124,6 +124,7 @@ public class CampaignController {
 		Organization topAncestor = orgService.findTopAncestor(org);
 		if (!Objects.equals(requestUser.getAppOrg().getId(), topAncestor.getId()))
 			throw new ApiException(HttpStatus.UNAUTHORIZED, "organization.unauthorized");
+		campaign.setTotalSupply(voucherClient.countTotalSupply(campaignId));
     	return campaign;
     }
 }

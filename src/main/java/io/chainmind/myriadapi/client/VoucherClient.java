@@ -70,6 +70,9 @@ public interface VoucherClient {
             @RequestParam(required = false, defaultValue="false") Boolean excludeIssued,
             @RequestParam(required = false)String searchTxt);
 	
+	@GetMapping("/vouchers/count/totalSupply")
+	int countTotalSupply(@RequestParam(required = true) String campaignId);
+	
     @GetMapping("/vouchers/{id}")
     VoucherResponse findVoucherById(@PathVariable(name = "id") String voucherId);
     

@@ -30,7 +30,7 @@ public class CampaignResponse extends IdResponse {
 	// number of vouchers to be issued
 	private int plannedSupply;
 //	// number of vouchers issued
-//	private int totalSupply;
+	private int totalSupply;
 	// allow or disallow additional issuance
 	private boolean autoUpdate;
 	// distribution method
