@@ -7,12 +7,15 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -206,16 +209,30 @@ public class VoucherController {
     	voucher.setIssuer(organizationService.findById(Long.valueOf(voucher.getIssuer())).getName());
     	
     	// query merchant data based on merchant id
-    	List<OrgDTO> merchants = new ArrayList<OrgDTO>();
+    	Set<OrgDTO> merchants = new TreeSet<OrgDTO>();
     	for (String id: voucher.getMerchants()) {
     		Organization merchant = organizationService.findById(Long.valueOf(id));
-    		merchants.add(OrgDTO.builder()
-    			.address(merchant.getFullAddress())
-    			.name(merchant.getFullName())
-    			.shortName(merchant.getName())
-    			.phone(merchant.getPhone())
-    			.id(merchant.getId().toString())
-    			.build());    		
+    		// query all subsidiaries
+    		List<Organization> outlets = organizationService.getDescendants(merchant);
+    		if (!CollectionUtils.isEmpty(outlets)) {
+    			outlets.forEach(o->{
+    				merchants.add(OrgDTO.builder()
+    		    			.address(o.getFullAddress())
+    		    			.name(o.getFullName())
+    		    			.shortName(o.getName())
+    		    			.phone(o.getPhone())
+    		    			.id(o.getId().toString())
+    		    			.build());
+    			});
+    		} else {
+	    		merchants.add(OrgDTO.builder()
+	    			.address(merchant.getFullAddress())
+	    			.name(merchant.getFullName())
+	    			.shortName(merchant.getName())
+	    			.phone(merchant.getPhone())
+	    			.id(merchant.getId().toString())
+	    			.build());   
+    		}
     	}
     	
     	VoucherDetailsResponse response = new VoucherDetailsResponse();

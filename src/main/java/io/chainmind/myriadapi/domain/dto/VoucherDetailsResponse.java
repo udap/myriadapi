@@ -1,6 +1,6 @@
 package io.chainmind.myriadapi.domain.dto;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Set;
 
 import io.chainmind.myriad.domain.dto.rule.ValidationDTO;
@@ -17,6 +17,6 @@ public class VoucherDetailsResponse extends VoucherSummary {
     private Set<ValidationDTO> rules;
     
     // where the vouchers can be redeemed
-    private List<OrgDTO> merchants;
+    private Collection<OrgDTO> merchants;
 
 }

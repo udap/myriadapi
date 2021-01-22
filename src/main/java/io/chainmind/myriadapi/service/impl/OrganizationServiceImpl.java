@@ -1,5 +1,6 @@
 package io.chainmind.myriadapi.service.impl;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,11 +83,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         return orgRepo.findDescendantByCode(org, code);
     }
     
-//	@Override
-//	public Page<Organization> findSubsidiaries(Organization org,String searchTxt,Pageable pageable) {
-//		if (StringUtils.hasText(searchTxt)){
-//			return orgRepo.findAllByParentAndSearchTxt(org,"%"+searchTxt+"%",pageable);
-//		}
-//		return orgRepo.findAllByParent(org,pageable);	
-//	}
+	@Override
+	public List<Organization> getDescendants(Organization org) {
+		return orgRepo.findDescendants(org);	
+	}
 }
