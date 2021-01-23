@@ -84,17 +84,18 @@ public class RedemptionController {
 		AuthorizedMerchant am = merchantService.find(marketer, merchant);
 		
 		// find current merchant's top ancestor - we need this to support merchant chain
-		Organization topAncestor = organizationService.findTopAncestor(merchant);
+		Organization mAncestor = organizationService.findTopAncestor(merchant);
 		
 		// the merchant may not be in the authorized merchant list but its ancestor could be
-		AuthorizedMerchant amAncestor = merchantService.find(marketer, topAncestor);
+		AuthorizedMerchant amAncestor = merchantService.find(marketer, mAncestor);
 		
-		// check if the merchant or its ancestor is an authorized merchant of any of the descendants of the marketer
-		boolean existsInDescendants = merchantService.existsInDescendant(marketer, merchant)
-				|| merchantService.existsInDescendant(marketer, topAncestor);
-		
-		Optional<Merchant> m = ValidationUtils.prepareMerchantFacts(merchant, topAncestor, 
-				am, amAncestor, existsInDescendants);
+		// a merchant or its ancestor may not be an authorized merchant of the marketer 
+		// but the merchant or its ancestor may be an authorized merchant of a subsidiary of the marketer
+		boolean merchantIsAuthorized = merchantService.existsInDescendant(marketer, merchant);
+		boolean ancestorIsAuthorized = merchantService.existsInDescendant(marketer, mAncestor);
+		// prepare mechant fact for redemption validation
+		Optional<Merchant> m = ValidationUtils.prepareMerchantFacts(merchant, mAncestor, 
+				am, amAncestor, merchantIsAuthorized, ancestorIsAuthorized);
 		if (!m.isPresent())
 			throw new ApiException(HttpStatus.FORBIDDEN, "merchant.notAuthorized");
 		
