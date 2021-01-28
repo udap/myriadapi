@@ -31,25 +31,31 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(Exception.class)
 	@ResponseBody
 	public ResponseEntity<String> defaultErrorHandler(Exception ex) throws Exception {
-		logger.error("异常了------",ex);
+		logger.error("异常了------",ex.getMessage());
 		ResponseEntity<String> stringResponseEntity =
-				new ResponseEntity<String>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+				new ResponseEntity<String>(ex.getMessage(), HttpStatus.BAD_REQUEST);
 		return stringResponseEntity;
 	}
 
 	@ExceptionHandler(FeignException.class)
 	@ResponseBody	
 	public ResponseEntity<String> feignExceptionHandler(FeignException feignEx) throws Exception {
+		logger.error("异常了------",feignEx.getMessage());
 		String body = feignEx.contentUTF8();
 		if (!StringUtils.hasText(body)){
 			body = feignEx.getMessage();
 		}
+		// if failed in feign executing (e.g., connection timeout) return a 503 error
+		if (feignEx.status() < 0)
+			return new ResponseEntity<String>(body, HttpStatus.SERVICE_UNAVAILABLE);
+		// return whatever error code the upstream returns	
 		return new ResponseEntity<String>(body, HttpStatus.valueOf(feignEx.status()));
 	}
 	
 	@ExceptionHandler(ApiException.class)
 	@ResponseBody
 	public ResponseEntity<Object> apiErrorHandler(ApiException apiException) throws Exception {
+		logger.error("异常了------", apiException.getMessage());
 		return new ResponseEntity<Object>(apiException.getMessage(), apiException.getStatus());
 	}
 
@@ -57,23 +63,23 @@ public class GlobalExceptionHandler {
 	@ResponseBody
 	public ResponseEntity<String> argumentErrorHandler(MethodArgumentNotValidException ex)
 			throws Exception {
-		logger.debug("异常了------", ex);
-		return new ResponseEntity<String>(ex.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+		logger.debug("异常了------", ex.getMessage());
+		return new ResponseEntity<String>(ex.getMessage(),HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler(value = BindException.class)
 	@ResponseBody
 	public ResponseEntity<String> bindException(HttpServletRequest req, BindException ex) throws Exception {
-		logger.debug("异常了------", ex);
-		return new ResponseEntity<String>(ex.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+		logger.debug("异常了------", ex.getMessage());
+		return new ResponseEntity<String>(ex.getMessage(),HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler(value = MethodArgumentTypeMismatchException.class)
 	@ResponseBody
 	public ResponseEntity<String> methodArgumentTypeMismatch(HttpServletRequest req,
 			MethodArgumentTypeMismatchException exception) throws Exception {
-		logger.debug("异常了------", exception);
-		return new ResponseEntity<String>(exception.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+		logger.debug("异常了------", exception.getMessage());
+		return new ResponseEntity<String>(exception.getMessage(),HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler(value = MultipartException.class)
@@ -83,8 +89,8 @@ public class GlobalExceptionHandler {
 //		Result<Object> result = new Result<Object>();
 //		result.setRetcode(Result.SC_ERROR);
 //		result.setMsg("上传的单个文件要小于" + maxFileSize + "。多个文件大小之和要小于：" + maxRequestSize);
-		logger.debug("异常了------", ex);
-		return new ResponseEntity<String>(ex.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+		logger.debug("异常了------", ex.getMessage());
+		return new ResponseEntity<String>(ex.getMessage(),HttpStatus.BAD_REQUEST);
 	}
 
 }

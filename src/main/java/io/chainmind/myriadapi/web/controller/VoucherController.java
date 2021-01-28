@@ -143,7 +143,7 @@ public class VoucherController {
 			log.debug("merchant ids: {}", merchantId);
 		}
 		
-		// excludes NEW vouchers
+		// excludes NEW vouchers and ensure issuer is either the current app org or a subsidiary of current app org
 		return voucherClient.queryVouchers(pageRequest, accountIds, campaignId, null, 
 				merchantId, type, status, true, null);
 	}
