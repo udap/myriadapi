@@ -1,6 +1,5 @@
 package io.chainmind.myriadapi.web;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -8,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.UUID;
 
+import org.apache.commons.lang.time.DateUtils;
 import org.springframework.cloud.openfeign.FeignFormatterRegistrar;
 import org.springframework.cloud.openfeign.support.PageJacksonModule;
 import org.springframework.context.annotation.Bean;
@@ -72,9 +72,8 @@ public class WebParamConverterConfig {
         return new Converter<String, Date>() {
             @Override
             public Date convert(String source) {
-                SimpleDateFormat format = new SimpleDateFormat(DEFAULT_DATE_TIME_FORMAT);
                 try {
-                    return format.parse(source);
+                	return DateUtils.parseDate(source, new String[] {DEFAULT_DATE_TIME_FORMAT});
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

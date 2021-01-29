@@ -2,8 +2,6 @@ package io.chainmind.myriadapi.web;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -17,11 +15,11 @@ import org.springframework.web.multipart.MultipartException;
 
 import feign.FeignException;
 import io.chainmind.myriadapi.domain.exception.ApiException;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
-	private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
-
 	/*@Value("${spring.servlet.multipart.max-file-size}")
 	private String maxFileSize;
 	@Value("${spring.servlet.multipart.max-request-size}")
@@ -31,7 +29,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(Exception.class)
 	@ResponseBody
 	public ResponseEntity<String> defaultErrorHandler(Exception ex) throws Exception {
-		logger.error("异常了------",ex.getMessage());
+		log.error("error raised", ex);
 		ResponseEntity<String> stringResponseEntity =
 				new ResponseEntity<String>(ex.getMessage(), HttpStatus.BAD_REQUEST);
 		return stringResponseEntity;
@@ -40,7 +38,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(FeignException.class)
 	@ResponseBody	
 	public ResponseEntity<String> feignExceptionHandler(FeignException feignEx) throws Exception {
-		logger.error("异常了------",feignEx.getMessage());
+		log.error("feign error: " + feignEx.getMessage(),feignEx);
 		String body = feignEx.contentUTF8();
 		if (!StringUtils.hasText(body)){
 			body = feignEx.getMessage();
@@ -55,7 +53,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(ApiException.class)
 	@ResponseBody
 	public ResponseEntity<Object> apiErrorHandler(ApiException apiException) throws Exception {
-		logger.error("异常了------", apiException.getMessage());
+		log.error("error raised", apiException);
 		return new ResponseEntity<Object>(apiException.getMessage(), apiException.getStatus());
 	}
 
@@ -63,14 +61,14 @@ public class GlobalExceptionHandler {
 	@ResponseBody
 	public ResponseEntity<String> argumentErrorHandler(MethodArgumentNotValidException ex)
 			throws Exception {
-		logger.debug("异常了------", ex.getMessage());
+		log.debug("error raised", ex);
 		return new ResponseEntity<String>(ex.getMessage(),HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler(value = BindException.class)
 	@ResponseBody
 	public ResponseEntity<String> bindException(HttpServletRequest req, BindException ex) throws Exception {
-		logger.debug("异常了------", ex.getMessage());
+		log.debug("error raised", ex);
 		return new ResponseEntity<String>(ex.getMessage(),HttpStatus.BAD_REQUEST);
 	}
 
@@ -78,7 +76,7 @@ public class GlobalExceptionHandler {
 	@ResponseBody
 	public ResponseEntity<String> methodArgumentTypeMismatch(HttpServletRequest req,
 			MethodArgumentTypeMismatchException exception) throws Exception {
-		logger.debug("异常了------", exception.getMessage());
+		log.debug("error raised", exception);
 		return new ResponseEntity<String>(exception.getMessage(),HttpStatus.BAD_REQUEST);
 	}
 
@@ -86,10 +84,7 @@ public class GlobalExceptionHandler {
 	@ResponseBody
 	public ResponseEntity<String> multipartErrorHandler(HttpServletRequest req, 
 			MultipartException ex) throws Exception {
-//		Result<Object> result = new Result<Object>();
-//		result.setRetcode(Result.SC_ERROR);
-//		result.setMsg("上传的单个文件要小于" + maxFileSize + "。多个文件大小之和要小于：" + maxRequestSize);
-		logger.debug("异常了------", ex.getMessage());
+		log.debug("error raised", ex);
 		return new ResponseEntity<String>(ex.getMessage(),HttpStatus.BAD_REQUEST);
 	}
 
