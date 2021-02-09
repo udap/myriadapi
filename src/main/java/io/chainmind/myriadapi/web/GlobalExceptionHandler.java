@@ -27,16 +27,12 @@ public class GlobalExceptionHandler {
 
 
 	@ExceptionHandler(Exception.class)
-	@ResponseBody
 	public ResponseEntity<String> defaultErrorHandler(Exception ex) throws Exception {
 		log.error("error raised", ex);
-		ResponseEntity<String> stringResponseEntity =
-				new ResponseEntity<String>(ex.getMessage(), HttpStatus.BAD_REQUEST);
-		return stringResponseEntity;
+		return new ResponseEntity<String>(ex.getMessage(), HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler(FeignException.class)
-	@ResponseBody	
 	public ResponseEntity<String> feignExceptionHandler(FeignException feignEx) throws Exception {
 		log.error("feign error: " + feignEx.getMessage(),feignEx);
 		String body = feignEx.contentUTF8();
@@ -51,40 +47,35 @@ public class GlobalExceptionHandler {
 	}
 	
 	@ExceptionHandler(ApiException.class)
-	@ResponseBody
 	public ResponseEntity<Object> apiErrorHandler(ApiException apiException) throws Exception {
 		log.error("error raised", apiException);
 		return new ResponseEntity<Object>(apiException.getMessage(), apiException.getStatus());
 	}
 
 	@ExceptionHandler(value = MethodArgumentNotValidException.class)
-	@ResponseBody
 	public ResponseEntity<String> argumentErrorHandler(MethodArgumentNotValidException ex)
 			throws Exception {
-		log.debug("error raised", ex);
+		log.error("error raised", ex);
 		return new ResponseEntity<String>(ex.getMessage(),HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler(value = BindException.class)
-	@ResponseBody
 	public ResponseEntity<String> bindException(HttpServletRequest req, BindException ex) throws Exception {
-		log.debug("error raised", ex);
+		log.error("error raised", ex);
 		return new ResponseEntity<String>(ex.getMessage(),HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler(value = MethodArgumentTypeMismatchException.class)
-	@ResponseBody
 	public ResponseEntity<String> methodArgumentTypeMismatch(HttpServletRequest req,
 			MethodArgumentTypeMismatchException exception) throws Exception {
-		log.debug("error raised", exception);
+		log.error("error raised", exception);
 		return new ResponseEntity<String>(exception.getMessage(),HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler(value = MultipartException.class)
-	@ResponseBody
 	public ResponseEntity<String> multipartErrorHandler(HttpServletRequest req, 
 			MultipartException ex) throws Exception {
-		log.debug("error raised", ex);
+		log.error("error raised", ex);
 		return new ResponseEntity<String>(ex.getMessage(),HttpStatus.BAD_REQUEST);
 	}
 
